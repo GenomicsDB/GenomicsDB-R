@@ -1,0 +1,11 @@
+Package: genomicsdb
+Type: Package
+Title: GenomicsDB R Bindings
+Version: 0.0.1
+Date: 2019-04-17
+Author: N G
+Maintainer: @nalinigans
+Description: Experimental GenomicsDB R Bindings to the native interface
+License: MIT + file LICENSE
+Imports: Rcpp (>= 1.0.0)
+LinkingTo: Rcpp
