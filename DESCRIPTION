@@ -4,8 +4,10 @@ Title: GenomicsDB R Bindings
 Version: 0.0.1
 Date: 2019-04-17
 Author: N G
-Maintainer: @nalinigans
+Maintainer: nalinigans <nalinigans@github.com>
 Description: Experimental GenomicsDB R Bindings to the native interface
 License: MIT + file LICENSE
+SystemRequirements: C++11
 Imports: Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
+Encoding: UTF-8
