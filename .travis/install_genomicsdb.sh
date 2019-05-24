@@ -34,5 +34,5 @@ install_genomicsdb() {
 			popd
 }
 
-install_prerequisites() &&
-install_genomicsdb()
+install_prerequisites &&
+install_genomicsdb
