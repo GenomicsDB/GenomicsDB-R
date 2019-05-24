@@ -1,0 +1,5 @@
+library(Rcpp)
+library(genomicsdb)
+gdb = genomicsdb::setup(workspace = "inputs/ws", vid_mapping_file = "inputs/vid.json", callset_mapping_file = "inputs/callset_t0_1_2.json", reference_genome="inputs/chr1_10MB.fasta.gz", ("DP"))
+genomicsdb::query_variants(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,1000000000)), row_ranges=list(c(0,3)))
+genomicsdb::version()

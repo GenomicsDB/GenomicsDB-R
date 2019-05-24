@@ -1,0 +1,2 @@
+PKG_CXXFLAGS=-I~/GenomicsDB.develop/src/main/cpp/include
+PKG_LIBS=~/GenomicsDB.develop/release/lib
