@@ -7,7 +7,7 @@ cache: packages
 
 install:
     # Install GenomicsDB
-    - source install_genomicsdb.sh
+    - source .travis/install_genomicsdb.sh
 
     # Install R package dependencies 
     - R -e 'install.packages("devtools")'
