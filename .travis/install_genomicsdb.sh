@@ -24,8 +24,8 @@ install_prerequisites() {
 install_genomicsdb() {
 	git clone https://github.com/GenomicsDB/GenomicsDB -b nalini_macos $GENOMICSDB_DIR &&
 			pushd $GENOMICSDB_DIR && git submodule update --recursive --init && popd &&
-			mkdir $GENOMICSDB_DIR &&
-			pushd build &&
+			mkdir $GENOMICSDB_BUILD_DIR &&
+			pushd $GENOMICSDB_BUILD_DIR &&
 			cmake $GENOMICSDB_DIR -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_INSTALL_DIR &&
 			make -j 4 &&
 			make install &&
