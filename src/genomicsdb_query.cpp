@@ -133,7 +133,7 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
 
   std::vector<Rcpp::List> variants_vector;
   try {
-    GenomicsDBVariants results = genomicsdb.get()->query_variants1(array, column_ranges_vector, row_ranges_vector);
+    GenomicsDBResults results = genomicsdb.get()->query_variants1(array, column_ranges_vector, row_ranges_vector);
     Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
     while (auto variant = results.next()) {
       // Interval
@@ -154,6 +154,7 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
       variants_vector.push_back(variant_list);
     }
     results.free();    
+
   } catch (const std::exception& e) {
     Rcpp::Rcerr << "GenomicsDB Exception: " << e.what() << "\nquery_variants() aborted!" << std::endl;
   }

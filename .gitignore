@@ -6,6 +6,9 @@
 .RData
 .R
 
+# Environment files
+.Renviron
+
 # Example code in package build process
 *-Ex.R
 

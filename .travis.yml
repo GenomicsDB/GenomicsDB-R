@@ -10,8 +10,7 @@ install:
     - source .travis/install_genomicsdb.sh
 
     # Install R package dependencies 
-    - R -e 'install.packages("devtools")'
-    - R -e 'devtools::install_deps(dependencies=T)'
+    - R -e 'install.packages("devtools", dependencies=TRUE)'
     - R -e 'install.packages(c("testthat", "roxygen2"))'
 
 script:
@@ -19,5 +18,5 @@ script:
     - R -e 'library(Rcpp); compileAttributes(".")'
     - R CMD build .
     - R CMD INSTALL --preclean --configure-args="--with-genomicsdb=${TRAVIS_BUILD_DIR}" genomicsdb_0.0.1.tar.gz
-    - R -f test2.R
+    - R -f tests/test.R
 
