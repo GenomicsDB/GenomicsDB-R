@@ -4,6 +4,7 @@
 
 # Session Data files
 .RData
+.R
 
 # Environment files
 .Renviron
