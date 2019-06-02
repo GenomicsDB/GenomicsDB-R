@@ -133,7 +133,7 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
 
   std::vector<Rcpp::List> variants_vector;
   try {
-    GenomicsDBResults results = genomicsdb.get()->query_variants1(array, column_ranges_vector, row_ranges_vector);
+    GenomicsDBResults<genomicsdb_variant_t> results = genomicsdb.get()->query_variants(array, column_ranges_vector, row_ranges_vector);
     Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
     while (auto variant = results.next()) {
       // Interval
@@ -144,10 +144,10 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
 
       // Genomic Fields
       std::vector<genomic_field_t> fields = genomicsdb.get()->get_genomic_fields(array, variant);
-      /*      Rcpp::List genomic_fields(fields.size());
-      for (auto i=0u; i<fields.size(); i++) {
-        
-      }*/
+
+      // Variant Calls
+      GenomicsDBVariantCalls calls = genomicsdb.get()->get_variant_calls(variant);
+      Rcpp::Rcout << "Number of calls returned = " <<  calls.size() << std::endl;
       
       Rcpp::List variant_list = Rcpp::List::create(interval, genomic_interval, fields);
       variant_list.names() = Rcpp::CharacterVector({"Interval", "Genomic Interval", "Genomic Fields"});
