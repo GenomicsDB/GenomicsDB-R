@@ -167,17 +167,28 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
                genomic_interval_t genomic_interval,
                std::vector<genomic_field_t> genomic_fields) {
     // GenomicsDBVariantCallProcessor::process(row, genomic_interval, genomic_fields);
-    Rcpp::List variant_call_list = Rcpp::List::create(row, genomic_interval, genomic_fields);
-    variant_call_list.names() = Rcpp::CharacterVector({"Row", "Genomic Interval", "Genomic Fields"});
-    m_variant_calls_vector.push_back(variant_call_list);
+    Rcpp::List variant_call_list = Rcpp::List::create(genomic_interval, genomic_fields);
+    variant_call_list.names() = Rcpp::CharacterVector({"Genomic Interval", "Genomic Fields"});
+    auto it = m_variant_calls_map.find(row);
+    if (it != m_variant_calls_map.end()) {
+      it->second.push_back(variant_call_list);
+    } else {
+      m_variant_calls_map.emplace(row, std::vector<Rcpp::List> { variant_call_list } );
+    }
   }
 
   void finalize_current_interval() {
-    if (m_variant_calls_vector.size() > 0) {
-      Rcpp::List variant_call_list_for_interval = Rcpp::List::create(m_interval, m_variant_calls_vector);
+    if (m_variant_calls_map.size() > 0) {
+      std::vector<Rcpp::List> variant_calls_vector;
+      for (std::map<uint32_t, std::vector<Rcpp::List>>::iterator it=m_variant_calls_map.begin(); it!=m_variant_calls_map.end(); ++it) {
+        Rcpp::List variant_call_list = Rcpp::List::create(it->first, wrap(it->second));
+        variant_call_list.names() = Rcpp::CharacterVector({"Row", "Info"});
+        variant_calls_vector.push_back(variant_call_list);
+      }
+      Rcpp::List variant_call_list_for_interval = Rcpp::List::create(m_interval, wrap(variant_calls_vector));
       variant_call_list_for_interval.names() = Rcpp::CharacterVector({"Query Interval", "Variant Calls"});
       m_intervals_vector.push_back(variant_call_list_for_interval);
-      m_variant_calls_vector.clear();
+      m_variant_calls_map.clear();
     }
   }
 
@@ -194,7 +205,7 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
 
   interval_t m_interval;
   std::vector<Rcpp::List> m_intervals_vector;
-  std::vector<Rcpp::List> m_variant_calls_vector;
+  std::map<uint32_t, std::vector<Rcpp::List>> m_variant_calls_map;
 };
 
 // [[Rcpp::export]]
