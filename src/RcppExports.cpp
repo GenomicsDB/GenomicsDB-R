@@ -57,6 +57,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// query_variant_calls
+Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb, const std::string& array, Rcpp::List column_ranges, Rcpp::List row_ranges);
+RcppExport SEXP _genomicsdb_query_variant_calls(SEXP genomicsdbSEXP, SEXP arraySEXP, SEXP column_rangesSEXP, SEXP row_rangesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::XPtr<GenomicsDB> >::type genomicsdb(genomicsdbSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type array(arraySEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type column_ranges(column_rangesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type row_ranges(row_rangesSEXP);
+    rcpp_result_gen = Rcpp::wrap(query_variant_calls(genomicsdb, array, column_ranges, row_ranges));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _genomicsdb_rcpp_hello_world() {
@@ -82,6 +96,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_genomicsdb_setup", (DL_FUNC) &_genomicsdb_setup, 5},
     {"_genomicsdb_setup_from_json", (DL_FUNC) &_genomicsdb_setup_from_json, 2},
     {"_genomicsdb_query_variants", (DL_FUNC) &_genomicsdb_query_variants, 4},
+    {"_genomicsdb_query_variant_calls", (DL_FUNC) &_genomicsdb_query_variant_calls, 4},
     {"_genomicsdb_rcpp_hello_world", (DL_FUNC) &_genomicsdb_rcpp_hello_world, 0},
     {"_genomicsdb_rcpp_vector_access1", (DL_FUNC) &_genomicsdb_rcpp_vector_access1, 0},
     {NULL, NULL, 0}
