@@ -161,3 +161,68 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
   return Rcpp::List::create(variants_vector);
 }
 
+class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
+ public:
+  void process(uint32_t row,
+               genomic_interval_t genomic_interval,
+               std::vector<genomic_field_t> genomic_fields) {
+    // GenomicsDBVariantCallProcessor::process(row, genomic_interval, genomic_fields);
+    Rcpp::List variant_call_list = Rcpp::List::create(genomic_interval, genomic_fields);
+    variant_call_list.names() = Rcpp::CharacterVector({"Genomic Interval", "Genomic Fields"});
+    auto it = m_variant_calls_map.find(row);
+    if (it != m_variant_calls_map.end()) {
+      it->second.push_back(variant_call_list);
+    } else {
+      m_variant_calls_map.emplace(row, std::vector<Rcpp::List> { variant_call_list } );
+    }
+  }
+
+  void finalize_current_interval() {
+    if (m_variant_calls_map.size() > 0) {
+      std::vector<Rcpp::List> variant_calls_vector;
+      for (std::map<uint32_t, std::vector<Rcpp::List>>::iterator it=m_variant_calls_map.begin(); it!=m_variant_calls_map.end(); ++it) {
+        Rcpp::List variant_call_list = Rcpp::List::create(it->first, wrap(it->second));
+        variant_call_list.names() = Rcpp::CharacterVector({"Row", "Info"});
+        variant_calls_vector.push_back(variant_call_list);
+      }
+      Rcpp::List variant_call_list_for_interval = Rcpp::List::create(m_interval, wrap(variant_calls_vector));
+      variant_call_list_for_interval.names() = Rcpp::CharacterVector({"Query Interval", "Variant Calls"});
+      m_intervals_vector.push_back(variant_call_list_for_interval);
+      m_variant_calls_map.clear();
+    }
+  }
+
+  void process(interval_t interval) {
+    // GenomicsDBVariantCallProcessor::process(interval);
+    finalize_current_interval();
+    m_interval = interval;
+  }
+
+  Rcpp::List get_intervals() {
+    finalize_current_interval();
+    return Rcpp::List::create(m_intervals_vector);
+  }
+
+  interval_t m_interval;
+  std::vector<Rcpp::List> m_intervals_vector;
+  std::map<uint32_t, std::vector<Rcpp::List>> m_variant_calls_map;
+};
+
+// [[Rcpp::export]]
+Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
+                 const std::string& array,
+                 Rcpp::List column_ranges,
+                 Rcpp::List row_ranges) {
+  genomicsdb_ranges_t column_ranges_vector = convert(column_ranges);
+  genomicsdb_ranges_t row_ranges_vector = convert(row_ranges);
+
+  VariantCallProcessor processor;
+  try {
+    GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor, array, column_ranges_vector, row_ranges_vector);
+    Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
+  } catch (const std::exception& e) {
+    Rcpp::Rcerr << "GenomicsDB Exception: " << e.what() << "\nquery_variants() aborted!" << std::endl;
+  }
+  return processor.get_intervals();
+}
+

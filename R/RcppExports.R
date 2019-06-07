@@ -17,6 +17,10 @@ query_variants <- function(genomicsdb, array, column_ranges, row_ranges) {
     .Call(`_genomicsdb_query_variants`, genomicsdb, array, column_ranges, row_ranges)
 }
 
+query_variant_calls <- function(genomicsdb, array, column_ranges, row_ranges) {
+    .Call(`_genomicsdb_query_variant_calls`, genomicsdb, array, column_ranges, row_ranges)
+}
+
 rcpp_hello_world <- function() {
     .Call(`_genomicsdb_rcpp_hello_world`)
 }
