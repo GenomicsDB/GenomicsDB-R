@@ -219,7 +219,9 @@ Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
   VariantCallProcessor processor;
   try {
     GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor, array, column_ranges_vector, row_ranges_vector);
-    Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
+    // TBD: As of now query_variant_calls does not return any GenomicsDBVariantCalls. 
+    //      All results are returned via the registered VariantCallProcessor that has implemented callbacks.
+    // Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
   } catch (const std::exception& e) {
     Rcpp::Rcerr << "GenomicsDB Exception: " << e.what() << "\nquery_variants() aborted!" << std::endl;
   }
