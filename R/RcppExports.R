@@ -5,12 +5,16 @@ version <- function() {
     .Call(`_genomicsdb_version`)
 }
 
-setup <- function(workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes) {
-    .Call(`_genomicsdb_setup`, workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes)
+connect <- function(workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes, segment_size = 10*1024*1024L) {
+    .Call(`_genomicsdb_connect`, workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes, segment_size)
 }
 
-setup_from_json <- function(query_configuration_json_file, loader_configuration_json_file) {
-    .Call(`_genomicsdb_setup_from_json`, query_configuration_json_file, loader_configuration_json_file)
+connect_with_query_json <- function(query_configuration_json_file, loader_configuration_json_file, concurrency_rank = 0L) {
+    .Call(`_genomicsdb_connect_with_query_json`, query_configuration_json_file, loader_configuration_json_file, concurrency_rank)
+}
+
+disconnect <- function(genomicsdb) {
+    invisible(.Call(`_genomicsdb_disconnect`, genomicsdb))
 }
 
 query_variants <- function(genomicsdb, array, column_ranges, row_ranges) {

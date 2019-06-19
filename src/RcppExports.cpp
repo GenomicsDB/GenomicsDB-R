@@ -16,9 +16,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// setup
-Rcpp::XPtr<GenomicsDB> setup(const std::string& workspace, const std::string& vid_mapping_file, const std::string& callset_mapping_file, const std::string& reference_genome, const std::vector<std::string> attributes);
-RcppExport SEXP _genomicsdb_setup(SEXP workspaceSEXP, SEXP vid_mapping_fileSEXP, SEXP callset_mapping_fileSEXP, SEXP reference_genomeSEXP, SEXP attributesSEXP) {
+// connect
+Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace, const std::string& vid_mapping_file, const std::string& callset_mapping_file, const std::string& reference_genome, const std::vector<std::string> attributes, const uint64_t segment_size);
+RcppExport SEXP _genomicsdb_connect(SEXP workspaceSEXP, SEXP vid_mapping_fileSEXP, SEXP callset_mapping_fileSEXP, SEXP reference_genomeSEXP, SEXP attributesSEXP, SEXP segment_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -27,20 +27,32 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type callset_mapping_file(callset_mapping_fileSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type reference_genome(reference_genomeSEXP);
     Rcpp::traits::input_parameter< const std::vector<std::string> >::type attributes(attributesSEXP);
-    rcpp_result_gen = Rcpp::wrap(setup(workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes));
+    Rcpp::traits::input_parameter< const uint64_t >::type segment_size(segment_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(connect(workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes, segment_size));
     return rcpp_result_gen;
 END_RCPP
 }
-// setup_from_json
-Rcpp::XPtr<GenomicsDB> setup_from_json(const std::string& query_configuration_json_file, const std::string& loader_configuration_json_file);
-RcppExport SEXP _genomicsdb_setup_from_json(SEXP query_configuration_json_fileSEXP, SEXP loader_configuration_json_fileSEXP) {
+// connect_with_query_json
+Rcpp::XPtr<GenomicsDB> connect_with_query_json(const std::string& query_configuration_json_file, const std::string& loader_configuration_json_file, const int concurrency_rank);
+RcppExport SEXP _genomicsdb_connect_with_query_json(SEXP query_configuration_json_fileSEXP, SEXP loader_configuration_json_fileSEXP, SEXP concurrency_rankSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type query_configuration_json_file(query_configuration_json_fileSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type loader_configuration_json_file(loader_configuration_json_fileSEXP);
-    rcpp_result_gen = Rcpp::wrap(setup_from_json(query_configuration_json_file, loader_configuration_json_file));
+    Rcpp::traits::input_parameter< const int >::type concurrency_rank(concurrency_rankSEXP);
+    rcpp_result_gen = Rcpp::wrap(connect_with_query_json(query_configuration_json_file, loader_configuration_json_file, concurrency_rank));
     return rcpp_result_gen;
+END_RCPP
+}
+// disconnect
+void disconnect(Rcpp::XPtr<GenomicsDB> genomicsdb);
+RcppExport SEXP _genomicsdb_disconnect(SEXP genomicsdbSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::XPtr<GenomicsDB> >::type genomicsdb(genomicsdbSEXP);
+    disconnect(genomicsdb);
+    return R_NilValue;
 END_RCPP
 }
 // query_variants
@@ -93,8 +105,9 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_genomicsdb_version", (DL_FUNC) &_genomicsdb_version, 0},
-    {"_genomicsdb_setup", (DL_FUNC) &_genomicsdb_setup, 5},
-    {"_genomicsdb_setup_from_json", (DL_FUNC) &_genomicsdb_setup_from_json, 2},
+    {"_genomicsdb_connect", (DL_FUNC) &_genomicsdb_connect, 6},
+    {"_genomicsdb_connect_with_query_json", (DL_FUNC) &_genomicsdb_connect_with_query_json, 3},
+    {"_genomicsdb_disconnect", (DL_FUNC) &_genomicsdb_disconnect, 1},
     {"_genomicsdb_query_variants", (DL_FUNC) &_genomicsdb_query_variants, 4},
     {"_genomicsdb_query_variant_calls", (DL_FUNC) &_genomicsdb_query_variant_calls, 4},
     {"_genomicsdb_rcpp_hello_world", (DL_FUNC) &_genomicsdb_rcpp_hello_world, 0},
