@@ -88,22 +88,31 @@ Rcpp::CharacterVector version() {
   return genomicsdb_version();
 }
 
+#define DEFAULT_SEGMENT_SIZE 10u*1024u*1024u
+
 // [[Rcpp::export]]
-Rcpp::XPtr<GenomicsDB> setup(const std::string& workspace,
-                             const std::string& vid_mapping_file,
-                             const std::string& callset_mapping_file,
-                             const std::string& reference_genome,
-                             const std::vector<std::string> attributes) {
-  GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, 40);
+Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
+                               const std::string& vid_mapping_file,
+                               const std::string& callset_mapping_file,
+                               const std::string& reference_genome,
+                               const std::vector<std::string> attributes,
+                               const uint64_t segment_size = 10*1024*1024) {
+  GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size);
   
   Rcpp::Rcout << "Got GenomicsDB" << std::endl;
   return Rcpp::XPtr<GenomicsDB>(genomicsdb);
 }
 
 // [[Rcpp::export]]
-Rcpp::XPtr<GenomicsDB> setup_from_json(const std::string& query_configuration_json_file, const std::string& loader_configuration_json_file) {
-  return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, loader_configuration_json_file));
-  
+Rcpp::XPtr<GenomicsDB> connect_with_query_json(const std::string& query_configuration_json_file,
+                                               const std::string& loader_configuration_json_file,
+                                               const int concurrency_rank = 0) {
+  return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, loader_configuration_json_file, concurrency_rank)); 
+}
+
+// [[Rcpp::export]]
+void disconnect(Rcpp::XPtr<GenomicsDB> genomicsdb) {
+  // Garbage collected automatically by Rcpp for now
 }
 
 genomicsdb_ranges_t convert(SEXP ranges_exp) {
@@ -134,7 +143,6 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
   std::vector<Rcpp::List> variants_vector;
   try {
     GenomicsDBResults<genomicsdb_variant_t> results = genomicsdb.get()->query_variants(array, column_ranges_vector, row_ranges_vector);
-    Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
     while (auto variant = results.next()) {
       // Interval
       interval_t interval = genomicsdb.get()->get_interval(variant);
@@ -148,35 +156,21 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
       // Variant Calls
       GenomicsDBVariantCalls calls = genomicsdb.get()->get_variant_calls(variant);
       Rcpp::Rcout << "Number of calls returned = " <<  calls.size() << std::endl;
-      
+
       Rcpp::List variant_list = Rcpp::List::create(interval, genomic_interval, fields);
       variant_list.names() = Rcpp::CharacterVector({"Interval", "Genomic Interval", "Genomic Fields"});
       variants_vector.push_back(variant_list);
     }
-    results.free();    
-
+    results.free();
   } catch (const std::exception& e) {
-    Rcpp::Rcerr << "GenomicsDB Exception: " << e.what() << "\nquery_variants() aborted!" << std::endl;
+    std::string msg = std::string(e.what()) + "\nquery_variants() aborted!";
+    throw Rcpp::exception(msg.c_str());
   }
   return Rcpp::List::create(variants_vector);
 }
 
 class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
  public:
-  void process(uint32_t row,
-               genomic_interval_t genomic_interval,
-               std::vector<genomic_field_t> genomic_fields) {
-    // GenomicsDBVariantCallProcessor::process(row, genomic_interval, genomic_fields);
-    Rcpp::List variant_call_list = Rcpp::List::create(genomic_interval, genomic_fields);
-    variant_call_list.names() = Rcpp::CharacterVector({"Genomic Interval", "Genomic Fields"});
-    auto it = m_variant_calls_map.find(row);
-    if (it != m_variant_calls_map.end()) {
-      it->second.push_back(variant_call_list);
-    } else {
-      m_variant_calls_map.emplace(row, std::vector<Rcpp::List> { variant_call_list } );
-    }
-  }
-
   void finalize_current_interval() {
     if (m_variant_calls_map.size() > 0) {
       std::vector<Rcpp::List> variant_calls_vector;
@@ -196,6 +190,19 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
     // GenomicsDBVariantCallProcessor::process(interval);
     finalize_current_interval();
     m_interval = interval;
+  }
+
+  void process(uint32_t row,
+               genomic_interval_t genomic_interval,
+               std::vector<genomic_field_t> genomic_fields) {
+    Rcpp::List variant_call_list = Rcpp::List::create(genomic_interval, genomic_fields);
+    variant_call_list.names() = Rcpp::CharacterVector({"Genomic Interval", "Genomic Fields"});
+    auto it = m_variant_calls_map.find(row);
+    if (it != m_variant_calls_map.end()) {
+      it->second.push_back(variant_call_list);
+    } else {
+      m_variant_calls_map.emplace(row, std::vector<Rcpp::List> { variant_call_list } );
+    }
   }
 
   Rcpp::List get_intervals() {
@@ -220,10 +227,13 @@ Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
   try {
     GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor, array, column_ranges_vector, row_ranges_vector);
     // TBD: As of now query_variant_calls does not return any GenomicsDBVariantCalls. 
-    //      All results are returned via the registered VariantCallProcessor that has implemented callbacks.
-    // Rcpp::Rcout << "Number of results returned = " <<  results.size() << std::endl;
+    //      All results are returned via the registered VariantCallProcessor process() callbacks
+    if (results.size() != 0) {
+      throw std::logic_error("Not yet implemented. query_variant_calls is not expected to return results");
+    }
   } catch (const std::exception& e) {
-    Rcpp::Rcerr << "GenomicsDB Exception: " << e.what() << "\nquery_variants() aborted!" << std::endl;
+    std::string msg = std::string(e.what()) + "\nquery_variant_calls() aborted!";
+    throw Rcpp::exception(msg.c_str());
   }
   return processor.get_intervals();
 }
