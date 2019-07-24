@@ -161,7 +161,6 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
       variant_list.names() = Rcpp::CharacterVector({"Interval", "Genomic Interval", "Genomic Fields"});
       variants_vector.push_back(variant_list);
     }
-    results.free();
   } catch (const std::exception& e) {
     std::string msg = std::string(e.what()) + "\nquery_variants() aborted!";
     throw Rcpp::exception(msg.c_str());
