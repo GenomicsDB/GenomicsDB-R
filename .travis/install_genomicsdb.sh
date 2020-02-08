@@ -22,7 +22,7 @@ install_prerequisites() {
 }
 
 install_genomicsdb() {
-	git clone https://github.com/GenomicsDB/GenomicsDB -b develop $GENOMICSDB_DIR &&
+	git clone https://github.com/GenomicsDB/GenomicsDB -b ng_genomicsdb_field_types $GENOMICSDB_DIR &&
 			pushd $GENOMICSDB_DIR && git submodule update --recursive --init && popd &&
 			mkdir $GENOMICSDB_BUILD_DIR &&
 			pushd $GENOMICSDB_BUILD_DIR &&
