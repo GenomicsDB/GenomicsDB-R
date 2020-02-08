@@ -43,10 +43,6 @@ namespace Rcpp
 
   template<>
   SEXP wrap(const genomic_interval_t& interval);
-
-  template<>
-  SEXP wrap(const std::vector<genomic_field_t>& genomic_fields);
-
 }
 
 #include <Rcpp.h>
@@ -71,15 +67,18 @@ SEXP Rcpp::wrap(const genomic_interval_t& genomic_interval) {
   return genomic_interval_list;
 }
 
-template<>
-SEXP Rcpp::wrap(const std::vector<genomic_field_t>& genomic_fields) {
+/*template<>
+SEXP Rcpp::wrap(const std::pair<const std::vector<genomic_field_t>&, const std::map<std::string, genomic_field_type_t>&> genomic_fields_with_types) {
+  auto genomic_fields = genomic_fields_with_types.first;
+  auto genomic_field_types = genomic_fields_with_types.second;
   Rcpp::List wrapped_genomic_fields(genomic_fields.size());
   for (auto i=0u; i<genomic_fields.size(); i++) {
-    Rcpp::CharacterVector field = Rcpp::CharacterVector::create(genomic_fields[i].first, genomic_fields[i].second);
+    auto field_name = genomic_fields[i].name;
+    Rcpp::CharacterVector field = Rcpp::CharacterVector::create(field_name, genomic_fields[i].to_string(genomic_field_types.at(field_name)));
     wrapped_genomic_fields[i] = field;
   }
   return wrapped_genomic_fields;
-}
+  }*/
 
 // [[Rcpp::plugins(cpp11)]]
 
@@ -154,10 +153,17 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
       std::vector<genomic_field_t> fields = genomicsdb.get()->get_genomic_fields(array, variant);
 
       // Variant Calls
-      GenomicsDBVariantCalls calls = genomicsdb.get()->get_variant_calls(variant);
+      GenomicsDBVariantCalls calls = genomicsdb.get()->get_variant_calls(array, variant);
       Rcpp::Rcout << "Number of calls returned = " <<  calls.size() << std::endl;
 
-      Rcpp::List variant_list = Rcpp::List::create(interval, genomic_interval, fields);
+      Rcpp::List wrapped_genomic_fields(calls.size());
+      auto i=0ul;
+      for (auto field: fields) {
+        Rcpp::CharacterVector field_vec = Rcpp::CharacterVector::create(field.name, field.to_string(calls.get_genomic_field_type(field.name)));
+        wrapped_genomic_fields[i++] = field_vec;
+      }
+
+      Rcpp::List variant_list = Rcpp::List::create(interval, genomic_interval, wrapped_genomic_fields);
       variant_list.names() = Rcpp::CharacterVector({"Interval", "Genomic Interval", "Genomic Fields"});
       variants_vector.push_back(variant_list);
     }
@@ -173,7 +179,7 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
   void finalize_current_interval() {
     if (m_variant_calls_map.size() > 0) {
       std::vector<Rcpp::List> variant_calls_vector;
-      for (std::map<uint32_t, std::vector<Rcpp::List>>::iterator it=m_variant_calls_map.begin(); it!=m_variant_calls_map.end(); ++it) {
+      for (std::map<uint64_t, std::vector<Rcpp::List>>::iterator it=m_variant_calls_map.begin(); it!=m_variant_calls_map.end(); ++it) {
         Rcpp::List variant_call_list = Rcpp::List::create(it->first, wrap(it->second));
         variant_call_list.names() = Rcpp::CharacterVector({"Row", "Info"});
         variant_calls_vector.push_back(variant_call_list);
@@ -185,17 +191,29 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
     }
   }
 
-  void process(interval_t interval) {
+  void process(const interval_t& interval) {
     // GenomicsDBVariantCallProcessor::process(interval);
     finalize_current_interval();
     m_interval = interval;
   }
 
-  void process(uint32_t row,
-               genomic_interval_t genomic_interval,
-               std::vector<genomic_field_t> genomic_fields) {
-    Rcpp::List variant_call_list = Rcpp::List::create(genomic_interval, genomic_fields);
+  Rcpp::List process_genomic_fields(const std::vector<genomic_field_t>& genomic_fields) {
+    Rcpp::List wrapped_genomic_fields(genomic_fields.size());
+    auto i=0ul;
+    for (auto field: genomic_fields) {
+      Rcpp::CharacterVector field_vec = Rcpp::CharacterVector::create(field.name, field.to_string(get_genomic_field_types()->at(field.name)));
+      wrapped_genomic_fields[i++] = field_vec;
+    }
+    return wrapped_genomic_fields;
+  }
+
+  void process(const std::string& sample_name,
+               const int64_t* coordinates,
+               const genomic_interval_t& genomic_interval,
+               const std::vector<genomic_field_t>& genomic_fields) {
+    Rcpp::List variant_call_list = Rcpp::List::create(genomic_interval, process_genomic_fields(genomic_fields));
     variant_call_list.names() = Rcpp::CharacterVector({"Genomic Interval", "Genomic Fields"});
+    auto row = coordinates[0];
     auto it = m_variant_calls_map.find(row);
     if (it != m_variant_calls_map.end()) {
       it->second.push_back(variant_call_list);
@@ -211,7 +229,7 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
 
   interval_t m_interval;
   std::vector<Rcpp::List> m_intervals_vector;
-  std::map<uint32_t, std::vector<Rcpp::List>> m_variant_calls_map;
+  std::map<uint64_t, std::vector<Rcpp::List>> m_variant_calls_map;
 };
 
 // [[Rcpp::export]]

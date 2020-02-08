@@ -1,4 +1,4 @@
-AC_INIT([genomicsdb], 0.0.1)
+AC_INIT([genomicsdb], 0.0.2)
 
 AC_LANG(C++)
 AC_REQUIRE_CPP
