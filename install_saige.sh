@@ -25,12 +25,12 @@ repo_src_url=https://github.com/weizhouUMICH/SAIGE
 git clone --depth 1 -b $src_branch $repo_src_url
 
 # Install SAIGE dependencies
-R -e 'install.packages("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "MetaSKAT", "SKAT", "roxygen2", "rversions","devtools")'
+R -e 'install.packages("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "MetaSKAT", "SKAT", "roxygen2", "rversions","devtools", repos="http://cran.us.r-project.org")'
 
 pushd SAIGE
 
 R CMD build .
-R CMD INSTALL --preclean SAIGE*tar.gz
+R CMD INSTALL SAIGE_0.36.3.1.tar.gz
 
 popd
 popd
