@@ -44,7 +44,7 @@ R -e 'install.packages("rversions", repos = "http://cran.us.r-project.org")'
 pushd SAIGE
 
 R CMD build .
-R CMD INSTALL --preclean SAIGE*tar.gz
+R CMD INSTALL SAIGE_0.36.3.1.tar.gz
 
 popd
 popd
