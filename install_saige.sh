@@ -25,7 +25,21 @@ repo_src_url=https://github.com/weizhouUMICH/SAIGE
 git clone --depth 1 -b $src_branch $repo_src_url
 
 # Install SAIGE dependencies
-R -e 'install.packages("R.utils", "Rcpp", "RcppParallel", "RcppArmadillo", "data.table", "RcppEigen", "Matrix", "methods", "BH", "optparse", "SPAtest", "MetaSKAT", "SKAT", "roxygen2", "rversions","devtools")'
+R -e 'install.packages("R.utils", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("Rcpp", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("RcppParallel", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("RcppArmadillo", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("data.table", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("RcppEigen", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("Matrix", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("methods", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("BH", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("optparse", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("SPAtest", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("MetaSKAT", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("SKAT", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("roxygen2", repos = "http://cran.us.r-project.org")'
+R -e 'install.packages("rversions", repos = "http://cran.us.r-project.org")'
 
 pushd SAIGE
 
