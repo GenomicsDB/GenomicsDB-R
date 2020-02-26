@@ -5,6 +5,7 @@ if [ `uname -s` == "Linux" ]; then
   sudo yum install -y R
 fi
 
+# Allows for R_LIB_PATH to be configured for packages, etc. to be installed in
 R_LIBS_PATH="$HOME/R-libs"
 if [ ! -d $R_LIBS_PATH ]; then
   mkdir $R_LIBS_PATH

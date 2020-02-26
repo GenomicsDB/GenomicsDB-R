@@ -5,7 +5,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Omics Data Automation, Inc.
+ * Copyright (c) 2019-2020 Omics Data Automation, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -233,6 +233,23 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
 };
 
 // [[Rcpp::export]]
+Rcpp::List query_variant_calls_json(Rcpp::XPtr<GenomicsDB> genomicsdb) {
+  VariantCallProcessor processor;
+  try {
+    GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor);
+    // TBD: As of now query_variant_calls does not return any GenomicsDBVariantCalls.
+    //      All results are returned via the registered VariantCallProcessor process() callbacks
+    if (results.size() != 0) {
+      throw std::logic_error("Not yet implemented. query_variant_calls is not expected to return results");
+    }
+  } catch (const std::exception& e) {
+    std::string msg = std::string(e.what()) + "\nquery_variant_calls() aborted!";
+    throw Rcpp::exception(msg.c_str());
+  }
+  return processor.get_intervals();
+}
+
+// [[Rcpp::export]]
 Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
                  const std::string& array,
                  Rcpp::List column_ranges,
@@ -255,3 +272,10 @@ Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
   return processor.get_intervals();
 }
 
+// [[Rcpp::export]]
+void generate_vcf(Rcpp::XPtr<GenomicsDB> genomicsdb,
+                  const std::string& output,
+                  const std::string& output_format,
+                  bool overwrite) {
+  genomicsdb.get()->generate_vcf(output, output_format, overwrite);
+}

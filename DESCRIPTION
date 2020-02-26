@@ -10,4 +10,5 @@ License: MIT + file LICENSE
 SystemRequirements: C++11
 Imports: Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
+Suggests: testthat
 Encoding: UTF-8
