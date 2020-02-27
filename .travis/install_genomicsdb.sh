@@ -1,9 +1,9 @@
 #!/bin/bash
 
-GENOMICSDB_DIR=$TRAVIS_BUILD_DIR/GenomicsDB
+GENOMICSDB_DIR=$HOME/GenomicsDB
 GENOMICSDB_BUILD_DIR=$GENOMICSDB_DIR/build
-GENOMICSDB_INSTALL_DIR=$TRAVIS_BUILD_DIR
-PATH=$TRAVIS_BUILD_DIR/bin:$PATH
+GENOMICSDB_INSTALL_DIR=$HOME
+PATH=$HOME/bin:$PATH
 
 install_prerequisites() {
 	sudo apt-get -y install lcov mpich zlib1g-dev libssl-dev rsync cmake uuid-dev libcurl4-openssl-dev &&
