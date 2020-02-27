@@ -1,0 +1,5 @@
+tests/spark_test.R
+^\.travis\.yml$
+^\.travis$
+^.*\.Rproj$
+^\.Rproj\.user$

@@ -15,8 +15,9 @@ install:
 
 script:
     # Build and Test R package
-    - R -e 'library(Rcpp); compileAttributes(".")'
+    - configure --with-genomicsdb=${TRAVIS_BUILD_DIR}
     - R CMD build .
     - R CMD INSTALL --preclean --configure-args="--with-genomicsdb=${TRAVIS_BUILD_DIR}" genomicsdb_0.0.2.tar.gz
-    - R -f tests/test.R
+    - R CMD check --no-manual genomicsdb_0.0.2.tar.gz
+    - R -e 'library(devtools); test()'
 

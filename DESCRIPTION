@@ -5,10 +5,11 @@ Version: 0.0.2
 Date: 2019-04-17
 Author: N G
 Maintainer: nalinigans <nalinigans@github.com>
-Description: Experimental GenomicsDB R Bindings to the native interface
+Description: This package features experimental R Bindings to the native GenomicsDB interface.
 License: MIT + file LICENSE
 SystemRequirements: C++11
 Imports: Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
-Suggests: testthat
+Suggests: 
+    testthat (>= 2.1.0)
 Encoding: UTF-8

@@ -5,8 +5,11 @@ AC_REQUIRE_CPP
 AC_PROG_CXX
 
 # default values
-echo "Using -I${HOME}/GenomicsDB/src/main/cpp/include for CPPFLAGS. Set env GENOMICSDB_HOME to override"
-AC_SUBST([GENOMICSDB_INSTALL_PATH], "")
+if test "${GENOMICSDB_HOME+set}" != set; then
+  echo "variable \$GENOMICSDB_HOME is not set"
+  GENOMICSDB_HOME="/usr/local"
+fi
+AC_SUBST([GENOMICSDB_INSTALL_PATH], ${GENOMICSDB_HOME})
 AC_SUBST([GENOMICSDB_LIBS], "-ltiledbgenomicsdb")
 
 # allow for overrides
@@ -15,16 +18,14 @@ AC_ARG_WITH([genomicsdb],
                            [GenomicsDB root install path [PREFIX]]),
             [
              GENOMICSDB_INSTALL_PATH="${with_genomicsdb}"
-	     GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${with_genomicsdb}/lib"
             ],
             [])
+
+GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${GENOMICSDB_INSTALL_PATH}/lib"
 
 # create and report output
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
-
-CPPFLAGS="${CPPFLAGS} ${GENOMICSDB_INSTALL_PATH}/include"
-LDFLAGS="${LDFLAGS} ${GENOMICSDB_INSTALL_PATH}/lib ${GENOMICSDB_LIBS}"
 
 echo
 echo "Final src/Makevars"

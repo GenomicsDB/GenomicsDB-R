@@ -2681,8 +2681,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 # default values
-echo "Using -I${HOME}/GenomicsDB/src/main/cpp/include for CPPFLAGS. Set env GENOMICSDB_HOME to override"
-GENOMICSDB_INSTALL_PATH=""
+if test "${GENOMICSDB_HOME+set}" != set; then
+  echo "variable \$GENOMICSDB_HOME is not set"
+  GENOMICSDB_HOME="/usr/local"
+fi
+GENOMICSDB_INSTALL_PATH=${GENOMICSDB_HOME}
 
 GENOMICSDB_LIBS="-ltiledbgenomicsdb"
 
@@ -2693,10 +2696,11 @@ GENOMICSDB_LIBS="-ltiledbgenomicsdb"
 if test "${with_genomicsdb+set}" = set; then :
   withval=$with_genomicsdb;
              GENOMICSDB_INSTALL_PATH="${with_genomicsdb}"
-	     GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${with_genomicsdb}/lib"
 
 fi
 
+
+GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${GENOMICSDB_INSTALL_PATH}/lib"
 
 # create and report output
 ac_config_files="$ac_config_files src/Makevars"
@@ -3856,9 +3860,6 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
-
-CPPFLAGS="${CPPFLAGS} ${GENOMICSDB_INSTALL_PATH}/include"
-LDFLAGS="${LDFLAGS} ${GENOMICSDB_INSTALL_PATH}/lib ${GENOMICSDB_LIBS}"
 
 echo
 echo "Final src/Makevars"

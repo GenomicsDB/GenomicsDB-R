@@ -54,6 +54,8 @@ autom4te.cache
 .\#*
 TAGS
 
+#RStudio
+GenomicsDB-R.Rproj
 
 #Ignore SAIGE for now
 SAIGE
