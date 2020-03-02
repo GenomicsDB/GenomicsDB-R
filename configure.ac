@@ -21,6 +21,11 @@ AC_ARG_WITH([genomicsdb],
             ],
             [])
 
+AC_CHECK_FILES([${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h
+                ${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h],
+               [],
+               [AC_MSG_ERROR([GenomicsDB include files not found])])
+
 GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${GENOMICSDB_INSTALL_PATH}/lib"
 
 # create and report output

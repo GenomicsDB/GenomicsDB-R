@@ -5,6 +5,10 @@ sudo: required
 dist: trusty
 cache: packages
 
+before_install:
+    - sudo apt-get update
+    - sudo apt-get -y install libxml2-dev
+
 install:
     # Install GenomicsDB
     - source .travis/install_genomicsdb.sh
@@ -15,9 +19,7 @@ install:
 
 script:
     # Build and Test R package
-    - configure --with-genomicsdb=${HOME}
     - R CMD build .
-    - R CMD INSTALL --preclean --configure-args="--with-genomicsdb=${HOME}" genomicsdb_0.0.2.tar.gz
-    - R CMD check --no-manual genomicsdb_0.0.2.tar.gz
-    - R -e 'library(devtools); test()'
-
+    - R CMD INSTALL --configure-args="--with-genomicsdb=${HOME}"  genomicsdb_0.0.2.tar.gz
+    - R CMD check --no-manual --install-args="--configure-args='--with-genomicsdb=${HOME}'" genomicsdb_0.0.2.tar.gz
+    - GENOMICSDB_HOME=${HOME} R -e 'devtools::test()'
