@@ -593,6 +593,7 @@ CPPFLAGS
 LDFLAGS
 CXXFLAGS
 CXX
+UNAME
 target_alias
 host_alias
 build_alias
@@ -1773,6 +1774,66 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# Only MacOS and Linux platforms are supported
+# Extract the first word of "uname", so it can be a program name with args.
+set dummy uname; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_UNAME+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$UNAME"; then
+  ac_cv_prog_UNAME="$UNAME" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_UNAME="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_UNAME" && ac_cv_prog_UNAME="no"
+fi
+fi
+UNAME=$ac_cv_prog_UNAME
+if test -n "$UNAME"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $UNAME" >&5
+$as_echo "$UNAME" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "$UNAME" = "no"; then :
+  as_fn_error $? "Only MacOS and Linux platforms are supported" "$LINENO" 5
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OS platform" >&5
+$as_echo_n "checking for OS platform... " >&6; }
+OS_PLATFORM=`uname -s`
+case "${OS_PLATFORM}" in
+     Linux*)
+         BUILD_PLATFORM=Linux
+         ;;
+     Darwin*)
+         BUILD_PLATFORM=Darwin
+         ;;
+     *)
+         as_fn_error $? "Only MacOS and Linux platforms are supported" "$LINENO" 5
+         ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $BUILD_PLATFORM" >&5
+$as_echo "$BUILD_PLATFORM" >&6; }
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -2680,23 +2741,81 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-# default values
-if test "${GENOMICSDB_HOME+set}" != set; then
-  echo "variable \$GENOMICSDB_HOME is not set"
-  GENOMICSDB_HOME="/usr/local"
-fi
+# Default values
 GENOMICSDB_INSTALL_PATH=${GENOMICSDB_HOME}
 
 GENOMICSDB_LIBS="-ltiledbgenomicsdb"
 
 
-# allow for overrides
+# Allow for overrides
 
 # Check whether --with-genomicsdb was given.
 if test "${with_genomicsdb+set}" = set; then :
   withval=$with_genomicsdb;
              GENOMICSDB_INSTALL_PATH="${with_genomicsdb}"
 
+fi
+
+
+# Check GENOMICSDB_INSTALL_PATH passed as either $GENOMICSDB_HOME or --with-genomicsdb
+if test "unset$GENOMICSDB_INSTALL_PATH" = "unset"; then :
+  as_fn_error $? "GenomicsDB installation not found.
+        Invoke configure with either \$GENOMICSDB_HOME env set to the installation path or
+        by explicitly specifying the path with the --with-genomicsdb argument" "$LINENO" 5
+fi
+
+# Sanity check installation
+as_ac_File=`$as_echo "ac_cv_file_${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h" >&5
+$as_echo_n "checking for ${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  as_fn_error $? "GenomicsDB include files not found" "$LINENO" 5
+fi
+as_ac_File=`$as_echo "ac_cv_file_${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h" >&5
+$as_echo_n "checking for ${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
+cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  as_fn_error $? "GenomicsDB include files not found" "$LINENO" 5
 fi
 
 
