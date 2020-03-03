@@ -2757,6 +2757,9 @@ if test "${with_genomicsdb+set}" = set; then :
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: GENOMICSDB_INSTALL_PATH=${GENOMICSDB_INSTALL_PATH}" >&5
+$as_echo "$as_me: GENOMICSDB_INSTALL_PATH=${GENOMICSDB_INSTALL_PATH}" >&6;}
+
 # Check GENOMICSDB_INSTALL_PATH passed as either $GENOMICSDB_HOME or --with-genomicsdb
 if test "unset$GENOMICSDB_INSTALL_PATH" = "unset"; then :
   as_fn_error $? "GenomicsDB installation not found.

@@ -37,6 +37,8 @@ AC_ARG_WITH([genomicsdb],
             ],
             [])
 
+AC_MSG_NOTICE([GENOMICSDB_INSTALL_PATH=${GENOMICSDB_INSTALL_PATH}])
+
 # Check GENOMICSDB_INSTALL_PATH passed as either $GENOMICSDB_HOME or --with-genomicsdb
 AS_IF([test "unset$GENOMICSDB_INSTALL_PATH" = "unset"],
       [AC_MSG_ERROR([GenomicsDB installation not found.
