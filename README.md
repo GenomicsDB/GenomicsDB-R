@@ -14,7 +14,7 @@ docker cp genomicsdb:/tmp/genomicsdb/install <path_to_genomicsdb>
 docker rm -fv genomicsdb
 ```
 
-### Installation from [Github](https://github.com/nalinigans/GenomicsDB-R) using [remotes](https://cran.r-project.org/package=remotes
+### Installation from [Github](https://github.com/nalinigans/GenomicsDB-R) using [remotes](https://cran.r-project.org/package=remotes)
 ```
 library(remotes)
 remotes::install_github("nalinigans/GenomicsDB-R", ref="refine_build", configure.args="--with-genomicsdb=<path_to_genomicsdb>")
