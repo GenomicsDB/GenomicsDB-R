@@ -20,6 +20,18 @@ case "${OS_PLATFORM}" in
 esac
 AC_MSG_RESULT([$BUILD_PLATFORM])
 
+# find R home and set FLAGS
+: ${R_HOME=`R RHOME`}
+if test -z "${R_HOME}"; then
+  echo "could not determine R_HOME"
+  exit 1
+fi
+RBIN="${R_HOME}/bin/R"
+
+CPPFLAGS=`"${RBIN}" CMD config CPPFLAGS`
+CXX11STD=`"${RBIN}" CMD config CXX11STD`
+CXXFLAGS=`"${RBIN}" CMD config CXX11FLAGS`
+
 AC_LANG(C++)
 AC_REQUIRE_CPP
 AC_PROG_CXX
@@ -32,17 +44,15 @@ AC_SUBST([GENOMICSDB_LIBS], "-ltiledbgenomicsdb")
 AC_ARG_WITH([genomicsdb],
             AC_HELP_STRING([--with-genomicsdb=[DIR]],
                            [GenomicsDB root install path [PREFIX]]),
-            [
-             GENOMICSDB_INSTALL_PATH="${with_genomicsdb}"
-            ],
+            [GENOMICSDB_INSTALL_PATH="${with_genomicsdb}"],
             [])
 
-AC_MSG_NOTICE([GENOMICSDB_INSTALL_PATH=${GENOMICSDB_INSTALL_PATH}])
+GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${GENOMICSDB_INSTALL_PATH}/lib"
 
-# Check GENOMICSDB_INSTALL_PATH passed as either $GENOMICSDB_HOME or --with-genomicsdb
+# Check existence of GENOMICSDB_INSTALL_PATH
 AS_IF([test "unset$GENOMICSDB_INSTALL_PATH" = "unset"],
       [AC_MSG_ERROR([GenomicsDB installation not found.
-        Invoke configure with either \$GENOMICSDB_HOME env set to the installation path or
+        Invoke with either \$GENOMICSDB_HOME env set to the installation path or
         by explicitly specifying the path with the --with-genomicsdb argument])])
 
 # Sanity check installation
@@ -51,7 +61,27 @@ AC_CHECK_FILES([${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h
                [],
                [AC_MSG_ERROR([GenomicsDB include files not found])])
 
-GENOMICSDB_LIBS="${GENOMICSDB_LIBS} -Wl,-rpath,${GENOMICSDB_INSTALL_PATH}/lib"
+# Try compiling with GenomicsDB headers
+CPPFLAGS="${CPPFLAGS} ${CXX11STD} ${CXXFLAGS} -I${GENOMICSDB_INSTALL_PATH}/include"
+AC_TRY_COMPILE([#include <genomicsdb.h>],
+               [],
+               [],
+               [AC_MSG_ERROR([unable to compile with genomicsdb.h])])
+
+# Check GenomicsDB installation
+LDFLAGS="${LD_FLAGS} -L${GENOMICSDB_INSTALL_PATH}/lib"
+LIBS="${LIBS} -ltiledbgenomicsdb"
+AC_MSG_CHECKING([whether genomicsdb works])
+AC_LINK_IFELSE([AC_LANG_SOURCE([[
+#include <genomicsdb.h>
+int main() {
+  if (genomicsdb_version().size() > 0)
+    return 0;
+  else
+    return -1;
+}]])],
+               [AC_MSG_RESULT([yes])],
+               [AC_MSG_ERROR([GenomicsDB installation at ${GENOMICSDB_INSTALL_PATH} is not functional])])
 
 # create and report output
 AC_CONFIG_FILES([src/Makevars])
