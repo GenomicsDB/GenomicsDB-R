@@ -106,7 +106,7 @@ Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
 Rcpp::XPtr<GenomicsDB> connect_with_query_json(const std::string& query_configuration_json_file,
                                                const std::string& loader_configuration_json_file,
                                                const int concurrency_rank = 0) {
-  return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, loader_configuration_json_file, concurrency_rank)); 
+  return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, GenomicsDB::JSON_FILE, loader_configuration_json_file, concurrency_rank)); 
 }
 
 // [[Rcpp::export]]

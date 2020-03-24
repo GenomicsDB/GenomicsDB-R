@@ -40,6 +40,10 @@ AC_PROG_CXX
 AC_SUBST([GENOMICSDB_INSTALL_PATH], ${GENOMICSDB_HOME})
 AC_SUBST([GENOMICSDB_LIBS], "-ltiledbgenomicsdb")
 
+echo "Nalini"
+echo "${GENOMICSDB_HOME}"
+echo "Nalini 1"
+
 # Allow for overrides
 AC_ARG_WITH([genomicsdb],
             AC_HELP_STRING([--with-genomicsdb=[DIR]],

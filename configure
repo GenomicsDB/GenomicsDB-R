@@ -2805,6 +2805,10 @@ GENOMICSDB_INSTALL_PATH=${GENOMICSDB_HOME}
 GENOMICSDB_LIBS="-ltiledbgenomicsdb"
 
 
+echo "Nalini"
+echo "${GENOMICSDB_HOME}"
+echo "Nalini 1"
+
 # Allow for overrides
 
 # Check whether --with-genomicsdb was given.
