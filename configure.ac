@@ -36,13 +36,11 @@ AC_LANG(C++)
 AC_REQUIRE_CPP
 AC_PROG_CXX
 
+echo "GENOMCICSDB_HOME=${GENOMICSDB_HOME}"
+
 # Default values
 AC_SUBST([GENOMICSDB_INSTALL_PATH], ${GENOMICSDB_HOME})
 AC_SUBST([GENOMICSDB_LIBS], "-ltiledbgenomicsdb")
-
-echo "Nalini"
-echo "${GENOMICSDB_HOME}"
-echo "Nalini 1"
 
 # Allow for overrides
 AC_ARG_WITH([genomicsdb],
