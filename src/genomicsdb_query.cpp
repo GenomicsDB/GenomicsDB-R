@@ -87,15 +87,13 @@ Rcpp::CharacterVector version() {
   return genomicsdb_version();
 }
 
-#define DEFAULT_SEGMENT_SIZE 10u*1024u*1024u
-
 // [[Rcpp::export]]
 Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
                                const std::string& vid_mapping_file,
                                const std::string& callset_mapping_file,
                                const std::string& reference_genome,
                                const std::vector<std::string> attributes,
-                               const uint64_t segment_size = DEFAULT_SEGMENT_SIZE) {
+                               const uint64_t segment_size = 10*1024*1024) {
   GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size);
   
   Rcpp::Rcout << "Got GenomicsDB" << std::endl;
