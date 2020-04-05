@@ -18,5 +18,5 @@ docker rm -fv genomicsdb
 ```
 From R/RStudio
 library(remotes)
-remotes::install_github("nalinigans/GenomicsDB-R", ref="refine_build", configure.args="--with-genomicsdb=<path_to_genomicsdb>")
+remotes::install_github("nalinigans/GenomicsDB-R", ref="<github_branch>", configure.args="--with-genomicsdb=<path_to_genomicsdb>")
 ```
