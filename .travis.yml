@@ -20,6 +20,6 @@ install:
 script:
     # Build and Test R package
     - R CMD build .
-    - R CMD INSTALL --configure-args="--with-genomicsdb=${GENOMICSDB_HOME}"  genomicsdb_0.0.2.tar.gz
-    - R CMD check --no-manual --install-args="--configure-args='--with-genomicsdb=${GENOMICSDB_HOME}'" genomicsdb_0.0.2.tar.gz
+    - R CMD INSTALL --configure-args="--with-genomicsdb=${GENOMICSDB_HOME}"  genomicsdb_0.0.3.tar.gz
+    - R CMD check --no-manual --install-args="--configure-args='--with-genomicsdb=${GENOMICSDB_HOME}'" genomicsdb_0.0.3.tar.gz
     - R -e 'library(devtools); devtools::test()'

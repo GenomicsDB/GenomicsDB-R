@@ -21,16 +21,24 @@ query_variants <- function(genomicsdb, array, column_ranges, row_ranges) {
     .Call(`_genomicsdb_query_variants`, genomicsdb, array, column_ranges, row_ranges)
 }
 
-query_variant_calls_json <- function(genomicsdb) {
-    .Call(`_genomicsdb_query_variant_calls_json`, genomicsdb)
-}
-
 query_variant_calls <- function(genomicsdb, array, column_ranges, row_ranges) {
     .Call(`_genomicsdb_query_variant_calls`, genomicsdb, array, column_ranges, row_ranges)
 }
 
-generate_vcf <- function(genomicsdb, output, output_format, overwrite) {
-    invisible(.Call(`_genomicsdb_generate_vcf`, genomicsdb, output, output_format, overwrite))
+query_variant_calls_json <- function(genomicsdb) {
+    .Call(`_genomicsdb_query_variant_calls_json`, genomicsdb)
+}
+
+query_variant_calls_by_interval <- function(genomicsdb, array, column_ranges, row_ranges) {
+    .Call(`_genomicsdb_query_variant_calls_by_interval`, genomicsdb, array, column_ranges, row_ranges)
+}
+
+generate_vcf <- function(genomicsdb, array, column_ranges, row_ranges, output, output_format, overwrite) {
+    invisible(.Call(`_genomicsdb_generate_vcf`, genomicsdb, array, column_ranges, row_ranges, output, output_format, overwrite))
+}
+
+generate_vcf_json <- function(genomicsdb, output, output_format, overwrite) {
+    invisible(.Call(`_genomicsdb_generate_vcf_json`, genomicsdb, output, output_format, overwrite))
 }
 
 rcpp_hello_world <- function() {

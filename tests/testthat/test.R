@@ -23,10 +23,23 @@ test_that("test that genomicsdb connects to an existing workspace for queries", 
 
     # Test Query VariantCalls - Return List of Query Intervals by Row
     variantcalls <- genomicsdb::query_variant_calls(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,1000000000)), row_ranges=list(c(0,3)))
+    expect_length(variantcalls, 9) # Number of columns
+    expect_true(nrow(variantcalls) == 5) # Number of rows
+          
+    variantcalls <- genomicsdb::query_variant_calls_by_interval(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,1000000000)), row_ranges=list(c(0,3)))
     expect_length(variantcalls, 1)
-    
+
     variantcalls1 <- genomicsdb::query_variant_calls(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)))
+    expect_length(variantcalls1, 9) # Number of columns
+    expect_true(nrow(variantcalls1) == 8) # Number of rows
+    variantcalls1 <- genomicsdb::query_variant_calls_by_interval(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)))
     expect_length(variantcalls1, 1)
+
+    # Test generate_vcf
+    output <- "generated_no_spark.vcf.gz"
+    genomicsdb::generate_vcf(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)), output=output, output_format="z", overwrite=FALSE)
+    expect_true(file.exists(output))
+    expect_true(file.exists(paste(output,".tbi",sep="")))
     
     genomicsdb::disconnect(genomicsdb=gdb)
 })
@@ -37,10 +50,12 @@ test_that("test that genomicsdb can output genotypes as strings", {
 
     # Test Query Variants - Returns List of Query Intervals by Row
     variantcalls <- genomicsdb::query_variant_calls(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)))
+    expect_length(variantcalls, 10) # Number of columns
+    expect_true(nrow(variantcalls) == 8) # Number of rows
+    print(variantcalls)
+    
+    variantcalls <- genomicsdb::query_variant_calls_by_interval(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)))
     expect_length(variantcalls, 1)
-    print("Variant Calls...")
-    print(variantcalls[1][1]$`Query Interval`)
-    print("Variant Calls Done")
     
     genomicsdb::disconnect(genomicsdb=gdb)
 })
@@ -51,7 +66,7 @@ test_that("test that genomicsdb connect to an existing workspace through query j
     expect_type(gdb, "externalptr")
 
     output <- "no_spark.vcf.gz"
-    genomicsdb::generate_vcf(genomicsdb=gdb, output=output, output_format="z", overwrite=FALSE)
+    genomicsdb::generate_vcf_json(genomicsdb=gdb, output=output, output_format="z", overwrite=FALSE)
     expect_true(file.exists(output))
     expect_true(file.exists(paste(output,".tbi",sep="")))
     
