@@ -152,7 +152,6 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
 
       // Variant Calls
       GenomicsDBVariantCalls calls = genomicsdb.get()->get_variant_calls(array, variant);
-      Rcpp::Rcout << "Number of calls returned = " <<  calls.size() << std::endl;
 
       Rcpp::List wrapped_genomic_fields(calls.size());
       auto i=0ul;
@@ -171,6 +170,152 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
   }
   return Rcpp::List::create(variants_vector);
 }
+
+#define STRING_FIELD(NAME, TYPE) (TYPE.is_string() || TYPE.is_char() || (NAME.compare("GT") == 0))
+#define INT_FIELD(TYPE) (TYPE.is_int())
+#define FLOAT_FIELD(TYPE) (TYPE.is_float())
+class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
+ public:
+  void process(const interval_t& interval) {
+    if (!m_is_initialized) {
+      m_is_initialized = true;
+      const std::shared_ptr<std::map<std::string, genomic_field_type_t>> genomic_field_types = get_genomic_field_types();
+      for (std::pair<std::string, genomic_field_type_t> field_type_pair : *genomic_field_types) {
+        std::string field_name = field_type_pair.first;
+        genomic_field_type_t field_type = field_type_pair.second;
+        if (field_name.compare("END")==0) {
+          continue;
+        }
+        // Order fields by inserting REF and ALT in the beginning
+        if (!field_name.compare("REF") && m_field_names.size() > 1) {
+          m_field_names.insert(m_field_names.begin(), field_name);
+        } else if (!field_name.compare("ALT") && m_field_names.size() > 2) {
+          m_field_names.insert(m_field_names.begin()+1, field_name);
+        } else {
+          m_field_names.push_back(field_name);
+        }
+        if (STRING_FIELD(field_name, field_type)) {
+          m_string_fields.emplace(std::make_pair(field_name, std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>())));
+        } else if (INT_FIELD(field_type)) {
+          m_int_fields.emplace(std::make_pair(field_name, std::shared_ptr<std::vector<int>>(new std::vector<int>())));
+        } else if (FLOAT_FIELD(field_type)) {
+           m_float_fields.emplace(std::make_pair(field_name, std::shared_ptr<std::vector<float>>(new std::vector<float>())));
+        } else {
+          std::string msg = "Genomic field type for " + field_name + " not supported";
+          throw Rcpp::exception(msg.c_str());
+        }
+      }
+    }
+  }
+
+  void process_fields(const std::vector<genomic_field_t>& genomic_fields) {
+    for (auto field_name: m_field_names) {
+      // END is part of the Genomic Coordinates, so don't process here
+      if (field_name.compare("END") == 0) {
+        continue;
+      }
+
+      auto field_type = get_genomic_field_types()->at(field_name);
+      
+      bool found = false;
+      for (auto genomic_field: genomic_fields) {
+        if (genomic_field.name.compare(field_name) == 0) {
+          if (STRING_FIELD(field_name, field_type)) {
+            m_string_fields[field_name]->push_back(genomic_field.to_string(field_type));
+          } else if (INT_FIELD(field_type)) {
+            m_int_fields[field_name]->push_back(genomic_field.int_value_at(0));
+          } else if (FLOAT_FIELD(field_type)) {
+            m_int_fields[field_name]->push_back( genomic_field.float_value_at(0));
+          } else {
+            std::string msg = "Genomic field type for " + field_name + " not supported";
+            throw Rcpp::exception(msg.c_str());
+          }
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        if (STRING_FIELD(field_name, field_type)) {
+          m_string_fields[field_name]->push_back("");
+        } else if (INT_FIELD(field_type)) {
+          m_int_fields[field_name]->push_back(Rcpp::IntegerVector::get_na());
+        } else if (FLOAT_FIELD(field_type)) {
+          m_int_fields[field_name]->push_back(Rcpp::NumericVector::get_na());
+        } else {
+          std::string msg = "Genomic field type for " + field_name + " not supported";
+          throw Rcpp::exception(msg.c_str());
+        }
+      }
+    }
+  }
+
+  void process(const std::string& sample_name,
+               const int64_t* coordinates,
+               const genomic_interval_t& genomic_interval,
+               const std::vector<genomic_field_t>& genomic_fields) {
+    m_rows.push_back(coordinates[0]);
+    m_cols.push_back(coordinates[1]);
+    m_sample_names.push_back(sample_name);
+    m_chrom.push_back(genomic_interval.contig_name);
+    m_pos.push_back(genomic_interval.interval.first);
+    m_end.push_back(genomic_interval.interval.second);
+    process_fields(genomic_fields);
+  }
+
+  Rcpp::DataFrame get_data_frame() {
+    auto num_fixed_fields = 6u;
+    
+    Rcpp::CharacterVector names(num_fixed_fields+m_field_names.size());
+    names[0] = "ROW";
+    names[1] = "COL";
+    names[2] = "SAMPLE";
+    names[3] = "CHROM";
+    names[4] = "POS";
+    names[5] = "END";
+    
+    Rcpp::List vector_list(num_fixed_fields+m_field_names.size());
+    vector_list[0] = m_rows;
+    vector_list[1] = m_cols;
+    vector_list[2] = m_sample_names;
+    vector_list[3] = m_chrom;
+    vector_list[4] = m_pos;
+    vector_list[5] = m_end;
+
+    auto i = num_fixed_fields-1;
+    for (auto field_name: m_field_names) {
+      names[++i] = field_name;
+      if (m_string_fields.find(field_name) != m_string_fields.end()) {
+        vector_list[i] = *m_string_fields[field_name];
+      } else if (m_int_fields.find(field_name) != m_int_fields.end()) {
+        vector_list[i] = *m_int_fields[field_name];
+      } else if (m_int_fields.find(field_name) != m_int_fields.end()) {
+        vector_list[i] = *m_float_fields[field_name];
+      } else {
+        std::string msg = "Genomic field type for " + field_name + " not supported";
+        throw Rcpp::exception(msg.c_str());
+      }
+    }
+
+    Rcpp::DataFrame data_frame(vector_list);
+    data_frame.attr("names") = names;
+    
+    return data_frame;
+  }
+
+ protected:
+  bool m_is_initialized = false;
+  std::vector<int64_t> m_rows;
+  std::vector<int64_t> m_cols;
+  std::vector<std::string> m_sample_names;
+  std::vector<std::string> m_chrom;
+  std::vector<uint64_t> m_pos;
+  std::vector<uint64_t> m_end;
+  std::vector<std::string> m_field_names;
+  std::map<std::string, std::shared_ptr<std::vector<std::string>>> m_string_fields;
+  std::map<std::string, std::shared_ptr<std::vector<int>>> m_int_fields;
+  std::map<std::string, std::shared_ptr<std::vector<float>>> m_float_fields;
+};
 
 class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
  public:
@@ -231,7 +376,30 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
 };
 
 // [[Rcpp::export]]
-Rcpp::List query_variant_calls_json(Rcpp::XPtr<GenomicsDB> genomicsdb) {
+Rcpp::DataFrame query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
+                 const std::string& array,
+                 Rcpp::List column_ranges,
+                 Rcpp::List row_ranges) {
+  genomicsdb_ranges_t column_ranges_vector = convert(column_ranges);
+  genomicsdb_ranges_t row_ranges_vector = convert(row_ranges);
+
+  ColumnarVariantCallProcessor processor;
+  try {
+    GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor, array, column_ranges_vector, row_ranges_vector);
+    // TBD: As of now query_variant_calls does not return any GenomicsDBVariantCalls. 
+    //      All results are returned via the registered VariantCallProcessor process() callbacks
+    if (results.size() != 0) {
+      throw std::logic_error("Not yet implemented. query_variant_calls is not expected to return results");
+    }
+  } catch (const std::exception& e) {
+    std::string msg = std::string(e.what()) + "\nquery_variant_calls() aborted!";
+    throw Rcpp::exception(msg.c_str());
+  }
+  return processor.get_data_frame();
+}
+
+// [[Rcpp::export]]
+Rcpp::DataFrame query_variant_calls_json(Rcpp::XPtr<GenomicsDB> genomicsdb) {
   VariantCallProcessor processor;
   try {
     GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor);
@@ -248,7 +416,7 @@ Rcpp::List query_variant_calls_json(Rcpp::XPtr<GenomicsDB> genomicsdb) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
+Rcpp::List query_variant_calls_by_interval(Rcpp::XPtr<GenomicsDB> genomicsdb,
                  const std::string& array,
                  Rcpp::List column_ranges,
                  Rcpp::List row_ranges) {
@@ -270,10 +438,27 @@ Rcpp::List query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
   return processor.get_intervals();
 }
 
+
 // [[Rcpp::export]]
 void generate_vcf(Rcpp::XPtr<GenomicsDB> genomicsdb,
+                  const std::string& array,
+                  Rcpp::List column_ranges,
+                  Rcpp::List row_ranges,
+                  const std::string& output,
+                  const std::string& output_format,
+                  bool overwrite) {
+  genomicsdb_ranges_t column_ranges_vector = convert(column_ranges);
+  genomicsdb_ranges_t row_ranges_vector = convert(row_ranges);
+  genomicsdb.get()->generate_vcf(array, column_ranges_vector, row_ranges_vector, output, output_format, overwrite);
+}
+
+
+
+// [[Rcpp::export]]
+void generate_vcf_json(Rcpp::XPtr<GenomicsDB> genomicsdb,
                   const std::string& output,
                   const std::string& output_format,
                   bool overwrite) {
   genomicsdb.get()->generate_vcf(output, output_format, overwrite);
 }
+
