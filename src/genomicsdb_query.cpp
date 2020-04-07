@@ -171,7 +171,7 @@ Rcpp::List query_variants(Rcpp::XPtr<GenomicsDB> genomicsdb,
   return Rcpp::List::create(variants_vector);
 }
 
-#define STRING_FIELD(NAME, TYPE) (TYPE.is_string() || TYPE.is_char() || (NAME.compare("GT") == 0))
+#define STRING_FIELD(NAME, TYPE) (TYPE.is_string() || TYPE.is_char() || TYPE.num_elements > 1 || (NAME.compare("GT") == 0))
 #define INT_FIELD(TYPE) (TYPE.is_int())
 #define FLOAT_FIELD(TYPE) (TYPE.is_float())
 class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
@@ -409,7 +409,7 @@ Rcpp::DataFrame query_variant_calls_json(Rcpp::XPtr<GenomicsDB> genomicsdb) {
       throw std::logic_error("Not yet implemented. query_variant_calls is not expected to return results");
     }
   } catch (const std::exception& e) {
-    std::string msg = std::string(e.what()) + "\nquery_variant_calls() aborted!";
+    std::string msg = std::string(e.what()) + "\nquery_variant_calls_json() aborted!";
     throw Rcpp::exception(msg.c_str());
   }
   return processor.get_intervals();
@@ -432,7 +432,7 @@ Rcpp::List query_variant_calls_by_interval(Rcpp::XPtr<GenomicsDB> genomicsdb,
       throw std::logic_error("Not yet implemented. query_variant_calls is not expected to return results");
     }
   } catch (const std::exception& e) {
-    std::string msg = std::string(e.what()) + "\nquery_variant_calls() aborted!";
+    std::string msg = std::string(e.what()) + "\nquery_variant_calls_by_interval() aborted!";
     throw Rcpp::exception(msg.c_str());
   }
   return processor.get_intervals();
