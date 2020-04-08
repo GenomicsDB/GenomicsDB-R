@@ -225,7 +225,7 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
           } else if (INT_FIELD(field_type)) {
             m_int_fields[field_name]->push_back(genomic_field.int_value_at(0));
           } else if (FLOAT_FIELD(field_type)) {
-            m_int_fields[field_name]->push_back( genomic_field.float_value_at(0));
+            m_float_fields[field_name]->push_back( genomic_field.float_value_at(0));
           } else {
             std::string msg = "Genomic field type for " + field_name + " not supported";
             throw Rcpp::exception(msg.c_str());
@@ -241,7 +241,7 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
         } else if (INT_FIELD(field_type)) {
           m_int_fields[field_name]->push_back(Rcpp::IntegerVector::get_na());
         } else if (FLOAT_FIELD(field_type)) {
-          m_int_fields[field_name]->push_back(Rcpp::NumericVector::get_na());
+          m_float_fields[field_name]->push_back(Rcpp::NumericVector::get_na());
         } else {
           std::string msg = "Genomic field type for " + field_name + " not supported";
           throw Rcpp::exception(msg.c_str());
@@ -289,7 +289,7 @@ class ColumnarVariantCallProcessor : public GenomicsDBVariantCallProcessor {
         vector_list[i] = *m_string_fields[field_name];
       } else if (m_int_fields.find(field_name) != m_int_fields.end()) {
         vector_list[i] = *m_int_fields[field_name];
-      } else if (m_int_fields.find(field_name) != m_int_fields.end()) {
+      } else if (m_float_fields.find(field_name) != m_float_fields.end()) {
         vector_list[i] = *m_float_fields[field_name];
       } else {
         std::string msg = "Genomic field type for " + field_name + " not supported";
