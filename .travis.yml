@@ -1,21 +1,31 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-  
-language: R
-sudo: required
-dist: trusty
-cache: packages
+language: r
 
-before_install:
-    - sudo apt-get update
-    - sudo apt-get -y install libxml2-dev
+os: linux
+dist: bionic
+sudo: true
+r:
+    - oldrel
+    - release
+    - devel
+
+cache:
+    - packages
+    - ccache
+
+repos:
+  CRAN: http://cran.rstudio.com
+
+apt_packages:
+    - libxml2-dev
 
 install:
-    # Install GenomicsDB
-    - source .travis/install_genomicsdb.sh
-
-    # Install R package dependencies 
+    # Install R package dependencies
     - R -e 'install.packages("devtools", dependencies=TRUE)'
     - R -e 'install.packages(c("testthat", "roxygen2"))'
+
+    # Install GenomicsDB
+    - source .travis/install_genomicsdb.sh
 
 script:
     # Build and Test R package

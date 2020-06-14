@@ -6,21 +6,25 @@ GENOMICSDB_BUILD_DIR=$GENOMICSDB_DIR/build
 GENOMICSDB_INSTALL_DIR=$GENOMICSDB_DIR/release
 PATH=$HOME/bin:$PATH
 
+install_protobuf() {
+  echo "Installing Protobuf"
+  pushd /tmp
+  git clone -b 3.0.x --single-branch https://github.com/google/protobuf.git &&
+  pushd protobuf &&
+  ./autogen.sh &&
+  ./configure --prefix=/usr --with-pic &&
+  make -j4 && sudo make install &&
+  echo "Installing Protobuf DONE"
+  popd
+  rm -fr /tmp/protobuf*
+  popd
+}
+
 install_prerequisites() {
   echo "Installing Prerequisites"
-	sudo apt-get -y install lcov mpich zlib1g-dev libssl-dev rsync cmake uuid-dev &&
-			sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y &&
-			sudo add-apt-repository -y ppa:openjdk-r/ppa &&
-			sudo apt-get update -q &&
-			sudo apt-get install gcc-4.9 -y &&
-			sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 &&
-			sudo apt-get install g++-4.9 -y &&
-			sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 60 &&
-			sudo apt-get -y install openjdk-8-jdk icedtea-plugin &&
-			sudo apt-get -y install zip unzip &&
-			mkdir protobuf_tmp && pushd protobuf_tmp && wget -nv https://github.com/GenomicsDB/GenomicsDB/releases/download/v1.0.0/protobuf-3.0.2-trusty.tar.gz -O protobuf-3.0.2-trusty.tar.gz &&
-			tar xzf protobuf-3.0.2-trusty.tar.gz && sudo rsync -a protobuf-3.0.2-trusty/ /usr/ && popd && rm -fr protobuf_tmp &&
-			jdk_switcher use openjdk8
+	sudo apt-get -y install zlib1g-dev libssl-dev cmake uuid-dev &&
+		sudo apt-get update -q &&
+		install_protobuf
 }
 
 install_genomicsdb() {
@@ -29,7 +33,7 @@ install_genomicsdb() {
 			pushd $GENOMICSDB_DIR && git submodule update --recursive --init && popd &&
 			mkdir $GENOMICSDB_BUILD_DIR &&
 			pushd $GENOMICSDB_BUILD_DIR &&
-			cmake $GENOMICSDB_DIR -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_INSTALL_DIR -DENABLE_CURL=0 &&
+			cmake $GENOMICSDB_DIR -DCMAKE_INSTALL_PREFIX=$GENOMICSDB_INSTALL_DIR -DENABLE_LIBCURL=0 -DDISABLE_MPI=1 &&
 			make -j 4 &&
 			make install &&
 			test -f $GENOMICSDB_INSTALL_DIR/include/genomicsdb.h &&
