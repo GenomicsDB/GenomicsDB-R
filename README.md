@@ -4,7 +4,7 @@ Experimental R bindings to the native [GenomicsDB](https://github.com/GenomicsDB
 ## Installation
 
 ### Prerequisites
-See [GenomicsDB-install](https://github.com/nalingans/GenomicsDB-Install) for a docker or a scripted install of GenomicsDB on your system for Linux based systems. For example, on an `ubuntu` system -
+See [GenomicsDB-install](https://github.com/nalingans/GenomicsDB-Install) for a docker or a scripted install of GenomicsDB for Linux based systems. For example, on an `ubuntu` system -
 ```
 git clone https://github.com/nalinigans/GenomicsDB-Install.git
 cd GenomicsDB-Install
