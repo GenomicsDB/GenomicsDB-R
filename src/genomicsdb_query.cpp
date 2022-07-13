@@ -91,10 +91,9 @@ Rcpp::CharacterVector version() {
 Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
                                const std::string& vid_mapping_file,
                                const std::string& callset_mapping_file,
-                               const std::string& reference_genome,
-                               const std::vector<std::string> attributes,
+                               const std::vector<std::string> attributes = ALL_ATTRIBUTES,
                                const uint64_t segment_size = 10*1024*1024) {
-  GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size);
+  GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, attributes, segment_size);
   
   Rcpp::Rcout << "Got GenomicsDB" << std::endl;
   return Rcpp::XPtr<GenomicsDB>(genomicsdb);
@@ -102,9 +101,10 @@ Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
 
 // [[Rcpp::export]]
 Rcpp::XPtr<GenomicsDB> connect_with_query_json(const std::string& query_configuration_json_file,
-                                               const std::string& loader_configuration_json_file,
+                                               const int query_configuration_type = GenomicsDB::JSON_FILE,
+                                               const std::string& loader_configuration_json_file = "",
                                                const int concurrency_rank = 0) {
-  return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, GenomicsDB::JSON_FILE, loader_configuration_json_file, concurrency_rank)); 
+  return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, (GenomicsDB::query_config_type_t)query_configuration_type, loader_configuration_json_file, concurrency_rank)); 
 }
 
 // [[Rcpp::export]]
@@ -444,12 +444,14 @@ void generate_vcf(Rcpp::XPtr<GenomicsDB> genomicsdb,
                   const std::string& array,
                   Rcpp::List column_ranges,
                   Rcpp::List row_ranges,
+                  const std::string& reference_genome,
+                  const std::string& vcfheader_template,
                   const std::string& output,
                   const std::string& output_format,
                   bool overwrite) {
   genomicsdb_ranges_t column_ranges_vector = convert(column_ranges);
   genomicsdb_ranges_t row_ranges_vector = convert(row_ranges);
-  genomicsdb.get()->generate_vcf(array, column_ranges_vector, row_ranges_vector, output, output_format, overwrite);
+  genomicsdb.get()->generate_vcf(array, column_ranges_vector, row_ranges_vector, reference_genome, vcfheader_template, output, output_format, overwrite);
 }
 
 

@@ -5,12 +5,12 @@ version <- function() {
     .Call(`_genomicsdb_version`)
 }
 
-connect <- function(workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes, segment_size = 10*1024*1024L) {
-    .Call(`_genomicsdb_connect`, workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes, segment_size)
+connect <- function(workspace, vid_mapping_file, callset_mapping_file, attributes, segment_size = 10*1024*1024L) {
+    .Call(`_genomicsdb_connect`, workspace, vid_mapping_file, callset_mapping_file, attributes, segment_size)
 }
 
-connect_with_query_json <- function(query_configuration_json_file, loader_configuration_json_file, concurrency_rank = 0L) {
-    .Call(`_genomicsdb_connect_with_query_json`, query_configuration_json_file, loader_configuration_json_file, concurrency_rank)
+connect_with_query_json <- function(query_configuration_json_file, query_configuration_type, loader_configuration_json_file = "", concurrency_rank = 0L) {
+    .Call(`_genomicsdb_connect_with_query_json`, query_configuration_json_file, query_configuration_type, loader_configuration_json_file, concurrency_rank)
 }
 
 disconnect <- function(genomicsdb) {
@@ -33,8 +33,8 @@ query_variant_calls_by_interval <- function(genomicsdb, array, column_ranges, ro
     .Call(`_genomicsdb_query_variant_calls_by_interval`, genomicsdb, array, column_ranges, row_ranges)
 }
 
-generate_vcf <- function(genomicsdb, array, column_ranges, row_ranges, output, output_format, overwrite) {
-    invisible(.Call(`_genomicsdb_generate_vcf`, genomicsdb, array, column_ranges, row_ranges, output, output_format, overwrite))
+generate_vcf <- function(genomicsdb, array, column_ranges, row_ranges, reference_genome, vcfheader_template, output, output_format, overwrite) {
+    invisible(.Call(`_genomicsdb_generate_vcf`, genomicsdb, array, column_ranges, row_ranges, reference_genome, vcfheader_template, output, output_format, overwrite))
 }
 
 generate_vcf_json <- function(genomicsdb, output, output_format, overwrite) {
