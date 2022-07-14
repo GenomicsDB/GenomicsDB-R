@@ -10,7 +10,7 @@ BUILD_FOR_PYTHON=true
 
 install_genomicsdb() {
   echo "Starting install of GenomicsDB"
-  if  [[ $(uname) == "Darwin" ]]; then export MACOSX_DEPLOYMENT_TARGET=10.13; export SUDO="" ; else export SUDO="sudo" fi &&
+  if  [[ $(uname) == "Darwin" ]]; then export MACOSX_DEPLOYMENT_TARGET=10.13; export SUDO="" ; else export SUDO="sudo"; fi &&
 	git clone https://github.com/GenomicsDB/GenomicsDB --recursive -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR &&
       $GENOMICSDB_DIR/scripts/prereqs/install_prereqs.sh &&
 			mkdir $GENOMICSDB_BUILD_DIR &&
