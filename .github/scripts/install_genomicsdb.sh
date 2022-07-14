@@ -11,7 +11,7 @@ BUILD_FOR_PYTHON=true
 install_genomicsdb() {
   echo "Starting install of GenomicsDB"
 	git clone https://github.com/GenomicsDB/GenomicsDB --recursive -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR &&
-      INSTALL_PREFIX=$HOME/genomicsdb_prereqs $GENOMICSDB_DIR/scripts/install_prereqs.sh &&
+      INSTALL_PREFIX=$HOME/genomicsdb_prereqs $GENOMICSDB_DIR/scripts/prereqs/install_prereqs.sh &&
       source $HOME/genomicsdb_prereqs.sh &&
 			mkdir $GENOMICSDB_BUILD_DIR &&
 			pushd $GENOMICSDB_BUILD_DIR &&
