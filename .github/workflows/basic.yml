@@ -19,7 +19,6 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
     strategy:
       matrix:
         os: [ubuntu-18.04,macos-10.15]
