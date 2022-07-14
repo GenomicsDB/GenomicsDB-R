@@ -21,21 +21,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// connect
-Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace, const std::string& vid_mapping_file, const std::string& callset_mapping_file, const std::vector<std::string> attributes, const uint64_t segment_size);
-RcppExport SEXP _genomicsdb_connect(SEXP workspaceSEXP, SEXP vid_mapping_fileSEXP, SEXP callset_mapping_fileSEXP, SEXP attributesSEXP, SEXP segment_sizeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::string& >::type workspace(workspaceSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type vid_mapping_file(vid_mapping_fileSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type callset_mapping_file(callset_mapping_fileSEXP);
-    Rcpp::traits::input_parameter< const std::vector<std::string> >::type attributes(attributesSEXP);
-    Rcpp::traits::input_parameter< const uint64_t >::type segment_size(segment_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(connect(workspace, vid_mapping_file, callset_mapping_file, attributes, segment_size));
-    return rcpp_result_gen;
-END_RCPP
-}
 // connect_with_query_json
 Rcpp::XPtr<GenomicsDB> connect_with_query_json(const std::string& query_configuration_json_file, const int query_configuration_type, const std::string& loader_configuration_json_file, const int concurrency_rank);
 RcppExport SEXP _genomicsdb_connect_with_query_json(SEXP query_configuration_json_fileSEXP, SEXP query_configuration_typeSEXP, SEXP loader_configuration_json_fileSEXP, SEXP concurrency_rankSEXP) {
@@ -166,7 +151,6 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_genomicsdb_version", (DL_FUNC) &_genomicsdb_version, 0},
-    {"_genomicsdb_connect", (DL_FUNC) &_genomicsdb_connect, 5},
     {"_genomicsdb_connect_with_query_json", (DL_FUNC) &_genomicsdb_connect_with_query_json, 4},
     {"_genomicsdb_disconnect", (DL_FUNC) &_genomicsdb_disconnect, 1},
     {"_genomicsdb_query_variants", (DL_FUNC) &_genomicsdb_query_variants, 4},

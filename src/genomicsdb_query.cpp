@@ -91,7 +91,7 @@ Rcpp::CharacterVector version() {
 Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
                                const std::string& vid_mapping_file,
                                const std::string& callset_mapping_file,
-                               const std::vector<std::string> attributes = ALL_ATTRIBUTES,
+                               const std::vector<std::string> attributes = {},
                                const uint64_t segment_size = 10*1024*1024) {
   GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, attributes, segment_size);
   
@@ -101,7 +101,7 @@ Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
 
 // [[Rcpp::export]]
 Rcpp::XPtr<GenomicsDB> connect_with_query_json(const std::string& query_configuration_json_file,
-                                               const int query_configuration_type = GenomicsDB::JSON_FILE,
+                                               const int query_configuration_type = 0, // GenomicsDB::JSON_FILE 
                                                const std::string& loader_configuration_json_file = "",
                                                const int concurrency_rank = 0) {
   return  Rcpp::XPtr<GenomicsDB>(new GenomicsDB(query_configuration_json_file, (GenomicsDB::query_config_type_t)query_configuration_type, loader_configuration_json_file, concurrency_rank)); 
