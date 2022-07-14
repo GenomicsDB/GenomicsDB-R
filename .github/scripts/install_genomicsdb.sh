@@ -13,7 +13,7 @@ install_genomicsdb() {
   export MACOSX_DEPLOYMENT_TARGET=10.13
 	git clone https://github.com/GenomicsDB/GenomicsDB --recursive -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR &&
       INSTALL_PREFIX=$HOME/genomicsdb_prereqs $GENOMICSDB_DIR/scripts/prereqs/install_prereqs.sh &&
-      brew install open-mpi &&
+      if [[ $(uname) == "Darwin" ]]; then brew install open-mpi; fi &&
       source $HOME/genomicsdb_prereqs.sh &&
 			mkdir $GENOMICSDB_BUILD_DIR &&
 			pushd $GENOMICSDB_BUILD_DIR &&
