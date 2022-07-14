@@ -21,8 +21,10 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-18.04,macos-10.15]
-        r-version: ['3.6.3', '4.1.1']
+        #os: [ubuntu-18.04,macos-10.15]
+        #r-version: ['3.6.3', '4.1.1']
+        os: [ubuntu-18.04]
+        r-version: ['4.1.1']
 
     runs-on: ${{matrix.os}}
     
@@ -45,6 +47,6 @@ jobs:
       - name: Build and Test
         run: |
           source $GITHUB_WORKSPACE/.github/scripts/install_genomicsdb.sh
-          $GITHUB_WORKSPACE/build.sh
+          // $GITHUB_WORKSPACE/build.sh
         shell: bash
 
