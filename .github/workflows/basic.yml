@@ -24,22 +24,24 @@ jobs:
         os: [ubuntu-18.04,macos-10.15]
         r-version: ['3.6.3', '4.1.1']
 
+    runs-on: ${{matrix.os}}
+    
     steps:
       - uses: actions/checkout@v3
+        
       - name: Set up R ${{ matrix.r-version }}
         uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
         with:
           r-version: ${{ matrix.r-version }}
-      - name: Install dependencies
+          
+      - name: Install R dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-      - name: Install R package dependencies
-        run: |
           install.packages("devtools", dependencies=TRUE)
           install.packages(c("testthat", "roxygen2"))
         shell: Rscript {0}
+        
       - name: Build and Test
         run: |
           source $GITHUB_WORKSPACE/.github/scripts/install_genomicsdb.sh
