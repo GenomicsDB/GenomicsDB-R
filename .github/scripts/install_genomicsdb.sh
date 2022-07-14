@@ -10,7 +10,7 @@ BUILD_FOR_PYTHON=true
 
 install_genomicsdb() {
   echo "Starting install of GenomicsDB"
-  export MACOSX_DEPLOYMENT_TARGET=10.13
+  if  [[ $(uname) == "Darwin" ]]; then export MACOSX_DEPLOYMENT_TARGET=10.13; fi &&
 	git clone https://github.com/GenomicsDB/GenomicsDB --recursive -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR &&
       INSTALL_PREFIX=$HOME/genomicsdb_prereqs $GENOMICSDB_DIR/scripts/prereqs/install_prereqs.sh &&
       if [[ $(uname) == "Darwin" ]]; then brew install open-mpi; fi &&
