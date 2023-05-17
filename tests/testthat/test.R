@@ -14,7 +14,7 @@ setwd(tmp_dir)
 
 
 test_that("test that genomicsdb connects to an existing workspace for queries", {
-    gdb <- genomicsdb::connect(workspace = "ws", vid_mapping_file = "vid.json", callset_mapping_file = "callset_t0_1_2.json", reference_genome="chr1_10MB.fasta.gz", c("DP"), 40)
+    gdb <- genomicsdb::connect(workspace = "ws", vid_mapping_file = "vid.json", callset_mapping_file = "callset_t0_1_2.json", c("DP"), 40)
     expect_type(gdb, "externalptr")
 
     # Test Query Variants - Returns List
@@ -37,7 +37,8 @@ test_that("test that genomicsdb connects to an existing workspace for queries", 
 
     # Test generate_vcf
     output <- "generated_no_spark.vcf.gz"
-    genomicsdb::generate_vcf(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)), output=output, output_format="z", overwrite=FALSE)
+    genomicsdb::generate_vcf(genomicsdb=gdb, array="t0_1_2", column_ranges=list(c(0,150000), c(15001, 1000000000)), row_ranges=list(c(0,3)),
+                             reference_genome="chr1_10MB.fasta.gz", vcf_header="template_vcf_header.vcf", output=output, output_format="z", overwrite=FALSE)
     expect_true(file.exists(output))
     expect_true(file.exists(paste(output,".tbi",sep="")))
     
@@ -45,7 +46,7 @@ test_that("test that genomicsdb connects to an existing workspace for queries", 
 })
 
 test_that("test that genomicsdb can output genotypes as strings", {
-    gdb <- genomicsdb::connect(workspace = "ws", vid_mapping_file = "vid.json", callset_mapping_file = "callset_t0_1_2.json", reference_genome="chr1_10MB.fasta.gz", c("DP", "GT"), 40)
+    gdb <- genomicsdb::connect(workspace = "ws", vid_mapping_file = "vid.json", callset_mapping_file = "callset_t0_1_2.json", c("DP", "GT"), 40)
     expect_type(gdb, "externalptr")
 
     # Test Query Variants - Returns List of Query Intervals by Row

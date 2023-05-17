@@ -1,8 +1,8 @@
 Package: genomicsdb
 Type: Package
 Title: GenomicsDB R Bindings
-Version: 0.0.3
-Date: 2019-04-17
+Version: 0.0.4
+Date: 2023-05-18
 Author: N G
 Maintainer: nalinigans <nalinigans@github.com>
 Description: This package features experimental R Bindings to the native GenomicsDB interface.

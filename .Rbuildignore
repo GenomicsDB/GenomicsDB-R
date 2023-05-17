@@ -3,3 +3,4 @@ tests/spark_test.R
 ^\.travis$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+.github/
