@@ -1,5 +1,5 @@
 # GenomicsDB-R
-Experimental R bindings to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library. Only queries are supported for now. For ingestion, use the command line tool - `[vcf2genomicsdb](https://github.com/GenomicsDB/GenomicsDB/wiki/Importing-VCF-data-into-GenomicsDB)` or [gatk GenomicsDBImport](https://gatk.broadinstitute.org/hc/en-us/articles/360047216891-GenomicsDBImport)
+Experimental R bindings to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library. Only queries are supported for now. For ingestion, use the command line tool - check [docs]((https://genomicsdb.readthedocs.io/en/latest/import-etl.html#)  for `GenomicsDB native import tools` or [gatk GenomicsDBImport](https://gatk.broadinstitute.org/hc/en-us/articles/13832686645787-GenomicsDBImport)
 
 ## Installation
 
