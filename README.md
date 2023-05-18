@@ -4,15 +4,7 @@ Experimental R bindings to the native [GenomicsDB](https://github.com/GenomicsDB
 ## Installation
 
 ### Prerequisites
-See [GenomicsDB-install](https://github.com/GenomicsDB/GenomicsDB-Install) for a docker or a scripted install of GenomicsDB for Linux based systems. For example, on an `ubuntu` system -
-```
-git clone https://github.com/GenomicsDB/GenomicsDB-Install.git
-cd GenomicsDB-Install
-docker build --build-arg os=ubuntu --build-arg branch=master --build-arg distributable_jar=true --build-arg install_dir=/tmp/genomicsdb/install -t genomicsdb:build .
-docker create -it --name genomicsdb genomicsdb:build bash
-docker cp genomicsdb:/tmp/genomicsdb/install <path_to_genomicsdb>
-docker rm -fv genomicsdb
-```
+See [GenomicsDB build/install](https://genomicsdb.readthedocs.io/en/latest/building-installing.html) for a docker or a scripted install of GenomicsDB for MacOS and Linux based systems.
 
 ### Installation from [Github](https://github.com/GenomicsDB/GenomicsDB-R) using [remotes](https://cran.r-project.org/package=remotes)
 ```
