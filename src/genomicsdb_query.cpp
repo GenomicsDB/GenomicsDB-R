@@ -5,7 +5,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2019-2020 Omics Data Automation, Inc.
+ * Copyright (c) 2019-2020, 2023 Omics Data Automation, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -84,17 +84,16 @@ SEXP Rcpp::wrap(const std::pair<const std::vector<genomic_field_t>&, const std::
 
 // [[Rcpp::export]]
 Rcpp::CharacterVector version() {
-  return genomicsdb_version();
+  return genomicsdb::version();
 }
 
 // [[Rcpp::export]]
 Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace,
                                const std::string& vid_mapping_file,
                                const std::string& callset_mapping_file,
-                               const std::string& reference_genome,
                                const std::vector<std::string> attributes,
                                const uint64_t segment_size = 10*1024*1024) {
-  GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, reference_genome, attributes, segment_size);
+  GenomicsDB *genomicsdb = new GenomicsDB(workspace, callset_mapping_file, vid_mapping_file, attributes, segment_size);
   
   Rcpp::Rcout << "Got GenomicsDB" << std::endl;
   return Rcpp::XPtr<GenomicsDB>(genomicsdb);
@@ -444,12 +443,14 @@ void generate_vcf(Rcpp::XPtr<GenomicsDB> genomicsdb,
                   const std::string& array,
                   Rcpp::List column_ranges,
                   Rcpp::List row_ranges,
+                  const std::string& reference_genome,
+                  const std::string& vcf_header,
                   const std::string& output,
                   const std::string& output_format,
                   bool overwrite) {
   genomicsdb_ranges_t column_ranges_vector = convert(column_ranges);
   genomicsdb_ranges_t row_ranges_vector = convert(row_ranges);
-  genomicsdb.get()->generate_vcf(array, column_ranges_vector, row_ranges_vector, output, output_format, overwrite);
+  genomicsdb.get()->generate_vcf(array, column_ranges_vector, row_ranges_vector, reference_genome, vcf_header, output, output_format, overwrite);
 }
 
 

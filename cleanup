@@ -1,3 +1,5 @@
 #!/bin/bash
+
+rm -f genomicsdb_*.tar.gz
 rm -f src/Makevars src/*.o src/*.so config.log config.status
 rm -fr genomicsdb.Rcheck

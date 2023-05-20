@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // version
 Rcpp::CharacterVector version();
 RcppExport SEXP _genomicsdb_version() {
@@ -17,18 +22,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // connect
-Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace, const std::string& vid_mapping_file, const std::string& callset_mapping_file, const std::string& reference_genome, const std::vector<std::string> attributes, const uint64_t segment_size);
-RcppExport SEXP _genomicsdb_connect(SEXP workspaceSEXP, SEXP vid_mapping_fileSEXP, SEXP callset_mapping_fileSEXP, SEXP reference_genomeSEXP, SEXP attributesSEXP, SEXP segment_sizeSEXP) {
+Rcpp::XPtr<GenomicsDB> connect(const std::string& workspace, const std::string& vid_mapping_file, const std::string& callset_mapping_file, const std::vector<std::string> attributes, const uint64_t segment_size);
+RcppExport SEXP _genomicsdb_connect(SEXP workspaceSEXP, SEXP vid_mapping_fileSEXP, SEXP callset_mapping_fileSEXP, SEXP attributesSEXP, SEXP segment_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type workspace(workspaceSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type vid_mapping_file(vid_mapping_fileSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type callset_mapping_file(callset_mapping_fileSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type reference_genome(reference_genomeSEXP);
     Rcpp::traits::input_parameter< const std::vector<std::string> >::type attributes(attributesSEXP);
     Rcpp::traits::input_parameter< const uint64_t >::type segment_size(segment_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(connect(workspace, vid_mapping_file, callset_mapping_file, reference_genome, attributes, segment_size));
+    rcpp_result_gen = Rcpp::wrap(connect(workspace, vid_mapping_file, callset_mapping_file, attributes, segment_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -109,18 +113,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // generate_vcf
-void generate_vcf(Rcpp::XPtr<GenomicsDB> genomicsdb, const std::string& array, Rcpp::List column_ranges, Rcpp::List row_ranges, const std::string& output, const std::string& output_format, bool overwrite);
-RcppExport SEXP _genomicsdb_generate_vcf(SEXP genomicsdbSEXP, SEXP arraySEXP, SEXP column_rangesSEXP, SEXP row_rangesSEXP, SEXP outputSEXP, SEXP output_formatSEXP, SEXP overwriteSEXP) {
+void generate_vcf(Rcpp::XPtr<GenomicsDB> genomicsdb, const std::string& array, Rcpp::List column_ranges, Rcpp::List row_ranges, const std::string& reference_genome, const std::string& vcf_header, const std::string& output, const std::string& output_format, bool overwrite);
+RcppExport SEXP _genomicsdb_generate_vcf(SEXP genomicsdbSEXP, SEXP arraySEXP, SEXP column_rangesSEXP, SEXP row_rangesSEXP, SEXP reference_genomeSEXP, SEXP vcf_headerSEXP, SEXP outputSEXP, SEXP output_formatSEXP, SEXP overwriteSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::XPtr<GenomicsDB> >::type genomicsdb(genomicsdbSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type array(arraySEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type column_ranges(column_rangesSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type row_ranges(row_rangesSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type reference_genome(reference_genomeSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type vcf_header(vcf_headerSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type output(outputSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type output_format(output_formatSEXP);
     Rcpp::traits::input_parameter< bool >::type overwrite(overwriteSEXP);
-    generate_vcf(genomicsdb, array, column_ranges, row_ranges, output, output_format, overwrite);
+    generate_vcf(genomicsdb, array, column_ranges, row_ranges, reference_genome, vcf_header, output, output_format, overwrite);
     return R_NilValue;
 END_RCPP
 }
@@ -159,14 +165,14 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_genomicsdb_version", (DL_FUNC) &_genomicsdb_version, 0},
-    {"_genomicsdb_connect", (DL_FUNC) &_genomicsdb_connect, 6},
+    {"_genomicsdb_connect", (DL_FUNC) &_genomicsdb_connect, 5},
     {"_genomicsdb_connect_with_query_json", (DL_FUNC) &_genomicsdb_connect_with_query_json, 3},
     {"_genomicsdb_disconnect", (DL_FUNC) &_genomicsdb_disconnect, 1},
     {"_genomicsdb_query_variants", (DL_FUNC) &_genomicsdb_query_variants, 4},
     {"_genomicsdb_query_variant_calls", (DL_FUNC) &_genomicsdb_query_variant_calls, 4},
     {"_genomicsdb_query_variant_calls_json", (DL_FUNC) &_genomicsdb_query_variant_calls_json, 1},
     {"_genomicsdb_query_variant_calls_by_interval", (DL_FUNC) &_genomicsdb_query_variant_calls_by_interval, 4},
-    {"_genomicsdb_generate_vcf", (DL_FUNC) &_genomicsdb_generate_vcf, 7},
+    {"_genomicsdb_generate_vcf", (DL_FUNC) &_genomicsdb_generate_vcf, 9},
     {"_genomicsdb_generate_vcf_json", (DL_FUNC) &_genomicsdb_generate_vcf_json, 4},
     {"_genomicsdb_rcpp_hello_world", (DL_FUNC) &_genomicsdb_rcpp_hello_world, 0},
     {"_genomicsdb_rcpp_vector_access1", (DL_FUNC) &_genomicsdb_rcpp_vector_access1, 0},
