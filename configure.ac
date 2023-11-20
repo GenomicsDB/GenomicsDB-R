@@ -1,4 +1,4 @@
-AC_INIT([genomicsdb], 0.0.2)
+AC_INIT([genomicsdb],[0.0.2])
 
 # Only MacOS and Linux platforms are supported
 AC_CHECK_PROG([UNAME], [uname], [yes], [no])
@@ -44,8 +44,7 @@ AC_SUBST([GENOMICSDB_LIBS], "-ltiledbgenomicsdb")
 
 # Allow for overrides
 AC_ARG_WITH([genomicsdb],
-            AC_HELP_STRING([--with-genomicsdb=[DIR]],
-                           [GenomicsDB root install path [PREFIX]]),
+            AS_HELP_STRING([--with-genomicsdb=[DIR]],[GenomicsDB root install path [PREFIX]]),
             [GENOMICSDB_INSTALL_PATH="${with_genomicsdb}"],
             [])
 
@@ -58,17 +57,13 @@ AS_IF([test "unset$GENOMICSDB_INSTALL_PATH" = "unset"],
         by explicitly specifying the path with the --with-genomicsdb argument])])
 
 # Sanity check installation
-AC_CHECK_FILES([${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h
-                ${GENOMICSDB_INSTALL_PATH}/include/genomicsdb_exception.h],
+AC_CHECK_FILES([${GENOMICSDB_INSTALL_PATH}/include/genomicsdb.h],
                [],
                [AC_MSG_ERROR([GenomicsDB include files not found])])
 
 # Try compiling with GenomicsDB headers
 CPPFLAGS="${CPPFLAGS} ${CXX11STD} ${CXXFLAGS} -I${GENOMICSDB_INSTALL_PATH}/include"
-AC_TRY_COMPILE([#include <genomicsdb.h>],
-               [],
-               [],
-               [AC_MSG_ERROR([unable to compile with genomicsdb.h])])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <genomicsdb.h>]], [[]])],[],[AC_MSG_ERROR([unable to compile with genomicsdb.h])])
 
 # Check GenomicsDB installation
 LDFLAGS="${LD_FLAGS} -L${GENOMICSDB_INSTALL_PATH}/lib"
@@ -77,7 +72,7 @@ AC_MSG_CHECKING([whether genomicsdb works])
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
 #include <genomicsdb.h>
 int main() {
-  if (genomicsdb_version().size() > 0)
+  if (genomicsdb::version().size() > 0)
     return 0;
   else
     return -1;

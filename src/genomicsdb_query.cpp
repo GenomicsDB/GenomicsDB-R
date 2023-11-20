@@ -6,6 +6,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2019-2020, 2023 Omics Data Automation, Inc.
+ * Copyright (c) 2023 dātma, inc™
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -401,7 +402,7 @@ Rcpp::DataFrame query_variant_calls(Rcpp::XPtr<GenomicsDB> genomicsdb,
 Rcpp::DataFrame query_variant_calls_json(Rcpp::XPtr<GenomicsDB> genomicsdb) {
   VariantCallProcessor processor;
   try {
-    GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor);
+    GenomicsDBVariantCalls results = genomicsdb.get()->query_variant_calls(processor, "", GenomicsDB::NONE);
     // TBD: As of now query_variant_calls does not return any GenomicsDBVariantCalls.
     //      All results are returned via the registered VariantCallProcessor process() callbacks
     if (results.size() != 0) {
